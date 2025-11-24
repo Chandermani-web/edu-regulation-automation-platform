@@ -11,14 +11,14 @@ const generateToken = (user) => {
     );
 };
 
-
+// login
 export const login = asyncHandler(async (req,res) => {
     const { email, password } = req.body;    
     let role = null;
 
     const institutionDomains = [ ".edu", ".ac.in", ".college.edu", ".university.in" ];
 
-    if(email === "chandermanimishra91@gmai.com") role = "super_admin";
+    if(email === "chandermanimishra91@gmail.com") role = "super_admin";
     else if(email.endsWith("@ugc.gov.in")) role = "ugc";
     else if(email.endsWith("@aicte.gov.in")) role = "aicte";
     else if (institutionDomains.some(domain => email.endsWith(domain)))
@@ -42,4 +42,23 @@ export const login = asyncHandler(async (req,res) => {
         token: generateToken(UserExist),
         role: UserExist.role
     });
+});
+
+
+export const getProfile = asyncHandler(async (req, res) => {
+    const userId = req.user.id;
+    const user =  await User.findById(userId).select('-password');
+
+    if(!user){
+        return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user);
+});
+
+
+// 🔹 Logout
+export const logout = asyncHandler(async (req, res) => {
+    res.clearCookie('token');
+    return res.status(200).json({ message: 'User logged out successfully' });
 });
