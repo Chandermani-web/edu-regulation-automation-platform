@@ -1,20 +1,26 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
 
 const institutionSchema = new mongoose.Schema({
-  name: String,
-  type: String,
+  user_id: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+  },
+
+  name: { type: String, required: true, unique: true },
+  type: { type: String, enum: ['university', 'college'], required: true },
   state: String,
-  district: String,
-  address: String,
+  district: { type: String, unique: true },
+  address: { type: String, unique: true },
   established_year: Number,
 
-  parameter: [{ type: mongoose.Schema.Types.ObjectId, ref: "Parameter" }],
   total_students: Number,
   total_faculty: Number,
-  website: String,
-  accreditation_status: String
-});
+  website: { type: String, unique: true },
+  accreditation_status: String,
 
-const Institution = mongoose.model("Institution", institutionSchema);
+  parameters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parameter' }]
+}, { timestamps: true });
 
+const Institution = mongoose.model('Institution', institutionSchema);
 export default Institution;

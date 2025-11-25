@@ -5,6 +5,8 @@ import bodyParser from "body-parser";
 import { fileURLToPath } from 'url';
 import path from 'path';
 import AuthRoutes from "./routes/auth.route.js";
+import InstitutionRoutes from './routes/institution.route.js'
+import InstitutionParameterRoutes from './routes/institution_parameter.route.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +29,8 @@ app.use(cookieParser());
 
 // routes
 app.use("/api/auth", AuthRoutes);
+app.use("/api/institution",InstitutionRoutes);
+app.use("/api/institutionparameter",InstitutionParameterRoutes);
 
 app.get("/",(req,res)=>{
     res.send("Server is running");
