@@ -2,8 +2,12 @@ import React, { useState } from "react";
 import { Lock, Shield, Brain, Eye, EyeOff, LogIn } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from 'react-toastify'
+import { useNavigate } from "react-router-dom";
+
+
 
 const Login = () => {
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -172,8 +176,12 @@ const Login = () => {
               </div>
 
               <button
-                type="submit"
+                type="button"
                 className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center space-x-2"
+                onClick={() => {
+                   localStorage.setItem("userRole", "institution");
+                   navigate("/dashboard");
+                   }}
               >
                 <LogIn className="h-5 w-5" />
                 <span>Login to Dashboard</span>
