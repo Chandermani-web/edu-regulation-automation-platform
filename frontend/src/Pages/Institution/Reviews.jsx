@@ -1,107 +1,144 @@
 import React, { useState } from "react";
 import Sidebar from "../../Components/Sidebar";
+import { ChevronDown, ChevronUp, FileSearch, CheckCircle2, AlertTriangle } from "lucide-react";
 
 const Reviews = () => {
-  const [selectedReview, setSelectedReview] = useState(null);
+  const [open, setOpen] = useState(null);
 
-  // Dummy review data — replace with backend API later
   const reviews = [
     {
       id: 1,
-      section: "Infrastructure",
-      comment: "The laboratory space is adequate, but equipment list is outdated. Upgrade recommended.",
-      rating: "Needs Improvement",
+      title: "Infrastructure",
+      summary: "Laboratory space is adequate, but equipment list is outdated.",
+      status: "Needs Improvement",
+      statusColor: "text-red-600 bg-red-100",
       date: "14 Jan 2025",
+      details: {
+        feedback: "The laboratory area meets minimum UGC standards. However, several equipment items listed are outdated or missing.",
+        corrections: [
+          "Update list of lab equipment.",
+          "Upload photos of working equipment.",
+          "Submit a purchase plan for missing items.",
+        ],
+        suggestions: [
+          "Upgrade Computer Lab with modern systems.",
+          "Increase safety signage and display boards.",
+        ],
+      },
     },
     {
       id: 2,
-      section: "Faculty",
-      comment: "Faculty qualifications are appropriate. However, 5 positions are vacant. Recruit immediately.",
-      rating: "Satisfactory",
+      title: "Faculty",
+      summary: "Faculty qualifications are appropriate. However, 5 positions are vacant.",
+      status: "Satisfactory",
+      statusColor: "text-blue-600 bg-blue-100",
       date: "10 Jan 2025",
+      details: {
+        feedback: "Most faculty members meet qualification norms. Vacancy positions must be filled within this semester.",
+        corrections: ["Submit recruitment plan for open positions."],
+        suggestions: ["Encourage faculty to publish more research papers."],
+      },
     },
     {
       id: 3,
-      section: "Financial Records",
-      comment: "Financial audit statements are verified and consistent with previous years.",
-      rating: "Good",
+      title: "Financial Records",
+      summary: "Financial audit statements verified and consistent.",
+      status: "Good",
+      statusColor: "text-green-700 bg-green-100",
       date: "07 Jan 2025",
+      details: {
+        feedback: "Audit statements follow UGC guidelines. No discrepancies found.",
+        corrections: [],
+        suggestions: ["Continue maintaining transparent financial reporting."],
+      },
     },
   ];
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex bg-gray-100 min-h-screen">
       <Sidebar />
 
-      <div className="w-full p-8">
-        <h1 className="text-2xl font-bold mb-6">UGC / AICTE Reviews</h1>
-        <p className="text-gray-600 mb-5">
-          These reviews are provided by UGC/AICTE after verification of your data and documents.
+      <div className="w-full p-10">
+        <h1 className="text-3xl font-bold">UGC / AICTE Reviews</h1>
+        <p className="text-gray-600 mb-6">
+          These reviews are provided after verification of your data and documents.
         </p>
 
-        {/* Review Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {reviews.map((r) => (
-            <div
-              key={r.id}
-              className="bg-white p-5 shadow rounded hover:shadow-lg cursor-pointer transition"
-              onClick={() => setSelectedReview(r)}
-            >
-              <h2 className="text-lg font-bold">{r.section}</h2>
-              <p className="text-sm text-gray-500 mt-1">{r.comment.slice(0, 60)}...</p>
+        <div className="grid grid-cols-2 gap-6">
+          {reviews.map((review) => (
+            <div key={review.id} className="bg-white shadow rounded-xl p-6 border">
+              {/* HEADER */}
+              <div className="flex justify-between items-center cursor-pointer"
+                onClick={() => setOpen(open === review.id ? null : review.id)}
+              >
+                <div>
+                  <h2 className="text-xl font-bold">{review.title}</h2>
+                  <p className="text-gray-600 text-sm mt-1">{review.summary}</p>
+                </div>
 
-              <div className="flex justify-between items-center mt-3">
-                <span
-                  className={`text-sm font-semibold ${
-                    r.rating === "Good"
-                      ? "text-green-600"
-                      : r.rating === "Satisfactory"
-                      ? "text-blue-500"
-                      : "text-red-500"
-                  }`}
-                >
-                  {r.rating}
-                </span>
-                <span className="text-xs text-gray-400">{r.date}</span>
+                {open === review.id ? (
+                  <ChevronUp className="text-gray-500" />
+                ) : (
+                  <ChevronDown className="text-gray-500" />
+                )}
               </div>
+
+              {/* STATUS & DATE */}
+              <div className="flex justify-between items-center mt-4">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-semibold ${review.statusColor}`}
+                >
+                  {review.status}
+                </span>
+                <span className="text-gray-500 text-sm">{review.date}</span>
+              </div>
+
+              {/* EXPANDED REVIEW DETAILS */}
+              {open === review.id && (
+                <div className="mt-6 space-y-6 border-t pt-4">
+                  {/* FEEDBACK */}
+                  <div>
+                    <h3 className="font-semibold flex items-center gap-2 text-gray-800">
+                      <FileSearch size={18} /> Detailed Feedback
+                    </h3>
+                    <p className="text-gray-700 mt-2">{review.details.feedback}</p>
+                  </div>
+
+                  {/* REQUIRED CORRECTIONS */}
+                  {review.details.corrections.length > 0 && (
+                    <div>
+                      <h3 className="font-semibold flex items-center gap-2 text-gray-800">
+                        <AlertTriangle size={18} /> Required Corrections
+                      </h3>
+                      <ul className="list-disc ml-6 mt-2 text-gray-700">
+                        {review.details.corrections.map((c, i) => (
+                          <li key={i}>{c}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* SUGGESTIONS */}
+                  <div>
+                    <h3 className="font-semibold flex items-center gap-2 text-gray-800">
+                      <CheckCircle2 size={18} /> Suggestions
+                    </h3>
+                    <ul className="list-disc ml-6 mt-2 text-gray-700">
+                      {review.details.suggestions.map((s, i) => (
+                        <li key={i}>{s}</li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* READ-ONLY NOTICE */}
+                  <p className="text-xs text-gray-500 italic">
+                    *This review is read-only. You cannot modify UGC/AICTE evaluations.
+                  </p>
+                </div>
+              )}
             </div>
           ))}
         </div>
-
-        {/* Review Details Modal */}
-        {selectedReview && (
-          <div className="mt-8 bg-white shadow p-6 rounded">
-            <div className="flex justify-between">
-              <h2 className="text-xl font-bold">{selectedReview.section}</h2>
-              <button
-                className="text-red-600 font-bold"
-                onClick={() => setSelectedReview(null)}
-              >
-                ✕ Close
-              </button>
-            </div>
-
-            <p className="text-gray-700 mt-4">{selectedReview.comment}</p>
-
-            <div className="mt-4">
-              <span
-                className={`px-3 py-1 rounded text-white font-semibold ${
-                  selectedReview.rating === "Good"
-                    ? "bg-green-600"
-                    : selectedReview.rating === "Satisfactory"
-                    ? "bg-blue-600"
-                    : "bg-red-600"
-                }`}
-              >
-                {selectedReview.rating}
-              </span>
-            </div>
-
-            <p className="text-sm text-gray-500 mt-3">
-              Reviewed on: {selectedReview.date}
-            </p>
-          </div>
-        )}
       </div>
     </div>
   );

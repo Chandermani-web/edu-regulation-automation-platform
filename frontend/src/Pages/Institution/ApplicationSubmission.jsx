@@ -1,132 +1,191 @@
 import React, { useState } from "react";
 import Sidebar from "../../Components/Sidebar";
+import {
+  FileCheck,
+  ClipboardList,
+  CheckCircle,
+  AlertTriangle,
+  FileWarning,
+  Send,
+} from "lucide-react";
 
 const ApplicationSubmission = () => {
-  const [form, setForm] = useState({
-    academicYear: "",
-    remarks: "",
-    parametersUploaded: false,
-    documentsUploaded: false,
-  });
-
+  const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setForm({
-      ...form,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = () => {
+    setShowConfirm(false);
     setSubmitted(true);
-    alert("Application Submitted Successfully!");
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Sidebar */}
+    <div className="flex min-h-screen bg-gray-100">
       <Sidebar />
 
-      <div className="flex flex-col w-full p-8">
-        <h1 className="text-2xl font-bold mb-6">Application Submission</h1>
-        <p className="mb-6 text-gray-600">
-          Fill the required details and submit the application for UGC/AICTE approval.
-        </p>
+      <div className="w-full p-10">
+        {/* Title */}
+        <h1 className="text-3xl font-bold mb-6">Application Submission</h1>
 
-        <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Academic Year */}
-          <div className="bg-white shadow rounded p-6">
-            <label className="font-semibold">Academic Year *</label>
-            <select
-              name="academicYear"
-              value={form.academicYear}
-              onChange={handleChange}
-              className="w-full border p-2 rounded mt-2"
-            >
-              <option value="">Select Academic Year</option>
-              <option value="2024-2025">2024-2025</option>
-              <option value="2023-2024">2023-2024</option>
-              <option value="2022-2023">2022-2023</option>
-            </select>
+        {/* Already Submitted Banner */}
+        {submitted && (
+          <div className="bg-green-100 border border-green-500 text-green-700 px-6 py-4 rounded-lg mb-6">
+            <b>Application Submitted Successfully!</b> Your application is now locked
+            and under review by UGC/AICTE.
           </div>
+        )}
 
-          {/* Parameter Confirmation */}
-          <div className="bg-white shadow rounded p-6">
-            <h2 className="font-semibold text-lg mb-2">Parameter Filling</h2>
-            <p className="text-gray-600 mb-3">
-              Ensure all parameters are filled correctly in the Parameters Entry Page.
-            </p>
+        {/* Academic Year */}
+        <div className="bg-white shadow-lg rounded-xl p-6 mb-8">
+          <label className="font-semibold text-lg">Academic Year *</label>
+          <select className="w-full border p-3 rounded-lg mt-2">
+            <option>Select Academic Year</option>
+            <option>2023-24</option>
+            <option>2024-25</option>
+            <option>2025-26</option>
+          </select>
+        </div>
 
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                name="parametersUploaded"
-                checked={form.parametersUploaded}
-                onChange={handleChange}
-              />
-              <span>All parameters filled</span>
-            </label>
+        {/* Parameter Review Section */}
+        <section className="bg-white shadow-lg rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <ClipboardList className="text-blue-600" /> Parameter Review Summary
+          </h2>
+
+          <p className="text-gray-600 mb-4">
+            Ensure all required parameters are properly filled in the Parameters Entry page.
+          </p>
+
+          <div className="grid grid-cols-3 gap-4">
+            {[
+              ["Student Strength", true],
+              ["Faculty Details", true],
+              ["Infrastructure", false],
+              ["Labs & Equipment", true],
+              ["Courses & Departments", true],
+              ["Research & Innovation", false],
+            ].map(([label, done], idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-xl border ${
+                  done ? "border-green-500 bg-green-50" : "border-yellow-500 bg-yellow-50"
+                }`}
+              >
+                <div className="flex items-center gap-2 font-semibold">
+                  {done ? (
+                    <CheckCircle className="text-green-600" size={20} />
+                  ) : (
+                    <AlertTriangle className="text-yellow-600" size={20} />
+                  )}
+                  {label}
+                </div>
+                <p className="text-sm text-gray-700 mt-1">
+                  {done ? "Completed" : "Some fields are pending"}
+                </p>
+              </div>
+            ))}
           </div>
+        </section>
 
-          {/* Document Confirmation */}
-          <div className="bg-white shadow rounded p-6">
-            <h2 className="font-semibold text-lg mb-2">Document Upload</h2>
-            <p className="text-gray-600 mb-3">
-              Ensure all required documents have been uploaded in the Document Upload page.
-            </p>
+        {/* Document Review Section */}
+        <section className="bg-white shadow-lg rounded-xl p-6 mb-8">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
+            <FileCheck className="text-purple-600" /> Document Upload Summary
+          </h2>
 
-            <label className="flex items-center gap-3">
-              <input
-                type="checkbox"
-                name="documentsUploaded"
-                checked={form.documentsUploaded}
-                onChange={handleChange}
-              />
-              <span>All documents uploaded</span>
-            </label>
+          <p className="text-gray-600 mb-4">
+            Verify that all documents are uploaded and verified.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            {[
+              ["Mandatory Documents", 12, 12],
+              ["Academic Documents", 5, 7],
+              ["Admin Records", 5, 5],
+              ["Infrastructure Proofs", 3, 4],
+              ["Financial Documents", 2, 3],
+              ["Faculty CVs", 8, 9],
+            ].map(([label, done, total], idx) => (
+              <div
+                key={idx}
+                className={`p-4 rounded-xl border ${
+                  done === total
+                    ? "border-green-500 bg-green-50"
+                    : "border-red-500 bg-red-50"
+                }`}
+              >
+                <div className="flex items-center gap-2 font-semibold">
+                  {done === total ? (
+                    <CheckCircle className="text-green-600" size={20} />
+                  ) : (
+                    <FileWarning className="text-red-600" size={20} />
+                  )}
+                  {label}
+                </div>
+                <p className="text-sm mt-1">
+                  Uploaded:{" "}
+                  <b>
+                    {done}/{total}
+                  </b>
+                </p>
+              </div>
+            ))}
           </div>
+        </section>
 
-          {/* Remarks */}
-          <div className="bg-white shadow rounded p-6">
-            <label className="font-semibold">Remarks (optional)</label>
-            <textarea
-              name="remarks"
-              value={form.remarks}
-              onChange={handleChange}
-              className="w-full border p-2 rounded h-24 mt-2"
-              placeholder="Any remarks before submission"
-            />
-          </div>
+        {/* Lock Warning */}
+        <div className="bg-yellow-100 border border-yellow-500 text-yellow-700 px-6 py-4 rounded-lg mb-8 flex gap-3 items-center">
+          <AlertTriangle size={22} />
+          <p>
+            <b>Warning:</b> After submission, the application will be locked. You cannot edit
+            parameters or upload documents until the review is completed.
+          </p>
+        </div>
 
-          {/* Submit Button */}
+        {/* Remarks Section */}
+        <div className="bg-white shadow-lg rounded-xl p-6 mb-8">
+          <label className="font-semibold text-lg">Remarks (Optional)</label>
+          <textarea
+            className="w-full border p-3 rounded-lg mt-2 h-28"
+            placeholder="Any final remarks before submission..."
+          ></textarea>
+        </div>
+
+        {/* Submit Button */}
+        {!submitted && (
           <button
-            type="submit"
-            disabled={
-              !form.academicYear ||
-              !form.parametersUploaded ||
-              !form.documentsUploaded
-            }
-            className={`px-6 py-3 rounded-lg font-semibold text-white ${
-              form.academicYear &&
-              form.parametersUploaded &&
-              form.documentsUploaded
-                ? "bg-blue-600"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
+            onClick={() => setShowConfirm(true)}
+            className="bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold shadow hover:bg-blue-800 flex items-center gap-2"
           >
-            Submit Application
+            <Send size={20} /> Submit Application
           </button>
+        )}
 
-          {/* Success Message */}
-          {submitted && (
-            <p className="text-green-600 mt-4 font-semibold text-lg">
-              🎉 Application successfully submitted!
-            </p>
-          )}
-        </form>
+        {/* Confirmation Modal */}
+        {showConfirm && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center">
+            <div className="bg-white rounded-xl p-6 shadow-xl w-96">
+              <h2 className="text-xl font-bold mb-4">Confirm Submission</h2>
+              <p className="mb-6">
+                Are you sure you want to submit this application? You will not be
+                able to make changes afterward.
+              </p>
+              <div className="flex justify-end gap-4">
+                <button
+                  onClick={() => setShowConfirm(false)}
+                  className="px-5 py-2 rounded-lg border"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  className="px-6 py-2 rounded-lg bg-blue-700 text-white font-semibold"
+                >
+                  Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
