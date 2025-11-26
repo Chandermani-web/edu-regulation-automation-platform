@@ -3,7 +3,17 @@ import { Route, Routes } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import Login from './Pages/Login';
 import AppContext from './Context/UseContext';
-import Dashboard from './Pages/Dashboard';
+// import Dashboard from './Pages/Dashboard';
+import InstitutionDashboard from './Pages/Institution/InstitutionDashboard';
+import InstitutionProfile from './Pages/Institution/InstitutionProfile';
+import ParametersEntry from './Pages/Institution/ParametersEntry';
+import DocumentUpload from './Pages/Institution/DocumentUpload';
+import ApplicationSubmission from './Pages/Institution/ApplicationSubmission';
+import Queries from './Pages/Institution/Queries';
+import Reviews from './Pages/Institution/Reviews';
+import AIAnalytics from './Pages/Institution/AIAnalytics';
+import AIReports from './Pages/Institution/AIReports';
+import Loading from './Utils/Loading';
 
 const App = () => {
   const { auth } = useContext(AppContext);
