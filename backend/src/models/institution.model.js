@@ -8,15 +8,15 @@ const institutionSchema = new mongoose.Schema({
   },
 
   name: { type: String, required: true, unique: true },
-  type: { type: String, enum: ['university', 'college'], required: true },
+  type: { type: String, enum: ['aicte', 'ugc'], required: true },
   state: String,
-  district: { type: String, unique: true },
-  address: { type: String, unique: true },
+  district: String,
+  address: String,
   established_year: Number,
 
   total_students: Number,
   total_faculty: Number,
-  website: { type: String, unique: true },
+  website: String,
   accreditation_status: String,
 
   parameters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parameter' }]

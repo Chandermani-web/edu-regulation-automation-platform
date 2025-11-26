@@ -23,7 +23,6 @@ const querySchema = new mongoose.Schema(
             replied_at: Date,
         },
         is_resolved: { type: Boolean, default: false },
-        created_at: { type: Date, default: Date.now },
     },
     { timestamps: true }
 );

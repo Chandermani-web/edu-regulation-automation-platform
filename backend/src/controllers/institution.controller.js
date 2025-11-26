@@ -1,4 +1,4 @@
-import { asyncHandler } from '../utils/asyncHandler.js';
+import { asyncHandler } from '../services/asyncHandler.js';
 import Institution from '../models/institution.model.js';
 import Parameter from '../models/institution_parameter.model.js';
 

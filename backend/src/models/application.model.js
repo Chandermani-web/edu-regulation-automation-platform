@@ -10,6 +10,11 @@ const applicationSchema = new mongoose.Schema({
         type: String,
         enum: ['submitted', 'under_review', 'approved', 'rejected'],
     },
+    approved_by: {
+        type: String,
+        enum: ['ugc', 'aicte'],
+        required: true,
+    },
     submitted_at: { type: Date, default: Date.now },
 });
 

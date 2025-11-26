@@ -1,7 +1,7 @@
 import User from "../models/auth.model.js";
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { asyncHandler } from "../utils/asyncHandler.js";
+import { asyncHandler } from "../services/asyncHandler.js";
 
 const generateToken = (user) => {
     return jwt.sign(
