@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import Sidebar from "../../Components/Sidebar";
-import { ChevronDown, ChevronUp, FileSearch, CheckCircle2, AlertTriangle } from "lucide-react";
+import Layout from "../../Components/Layout";
+import StepProgress from "../../Components/StepProgress";
+import {
+  ChevronDown,
+  ChevronUp,
+  FileSearch,
+  CheckCircle2,
+  AlertTriangle,
+} from "lucide-react";
 
 const Reviews = () => {
   const [open, setOpen] = useState(null);
@@ -14,7 +21,8 @@ const Reviews = () => {
       statusColor: "text-red-600 bg-red-100",
       date: "14 Jan 2025",
       details: {
-        feedback: "The laboratory area meets minimum UGC standards. However, several equipment items listed are outdated or missing.",
+        feedback:
+          "The laboratory area meets minimum UGC standards. However, several equipment items listed are outdated or missing.",
         corrections: [
           "Update list of lab equipment.",
           "Upload photos of working equipment.",
@@ -29,12 +37,14 @@ const Reviews = () => {
     {
       id: 2,
       title: "Faculty",
-      summary: "Faculty qualifications are appropriate. However, 5 positions are vacant.",
+      summary:
+        "Faculty qualifications are appropriate. However, 5 positions are vacant.",
       status: "Satisfactory",
       statusColor: "text-blue-600 bg-blue-100",
       date: "10 Jan 2025",
       details: {
-        feedback: "Most faculty members meet qualification norms. Vacancy positions must be filled within this semester.",
+        feedback:
+          "Most faculty members meet qualification norms. Vacancy positions must be filled within this semester.",
         corrections: ["Submit recruitment plan for open positions."],
         suggestions: ["Encourage faculty to publish more research papers."],
       },
@@ -47,7 +57,8 @@ const Reviews = () => {
       statusColor: "text-green-700 bg-green-100",
       date: "07 Jan 2025",
       details: {
-        feedback: "Audit statements follow UGC guidelines. No discrepancies found.",
+        feedback:
+          "Audit statements follow UGC guidelines. No discrepancies found.",
         corrections: [],
         suggestions: ["Continue maintaining transparent financial reporting."],
       },
@@ -55,25 +66,34 @@ const Reviews = () => {
   ];
 
   return (
-    <div className="flex bg-gray-100 min-h-screen">
-      <Sidebar />
+    <Layout showNavbar={false}>
+      <StepProgress currentStep={6} />
 
       <div className="w-full p-10">
-        <h1 className="text-3xl font-bold">UGC / AICTE Reviews</h1>
+      
         <p className="text-gray-600 mb-6">
-          These reviews are provided after verification of your data and documents.
+          These reviews are provided after verification of your data and
+          documents.
         </p>
 
         <div className="grid grid-cols-2 gap-6">
           {reviews.map((review) => (
-            <div key={review.id} className="bg-white shadow rounded-xl p-6 border">
+            <div
+              key={review.id}
+              className="bg-white shadow rounded-xl p-6 border"
+            >
               {/* HEADER */}
-              <div className="flex justify-between items-center cursor-pointer"
-                onClick={() => setOpen(open === review.id ? null : review.id)}
+              <div
+                className="flex justify-between items-center cursor-pointer"
+                onClick={() =>
+                  setOpen(open === review.id ? null : review.id)
+                }
               >
                 <div>
                   <h2 className="text-xl font-bold">{review.title}</h2>
-                  <p className="text-gray-600 text-sm mt-1">{review.summary}</p>
+                  <p className="text-gray-600 text-sm mt-1">
+                    {review.summary}
+                  </p>
                 </div>
 
                 {open === review.id ? (
@@ -93,7 +113,7 @@ const Reviews = () => {
                 <span className="text-gray-500 text-sm">{review.date}</span>
               </div>
 
-              {/* EXPANDED REVIEW DETAILS */}
+              {/* EXPANDED DETAILS */}
               {open === review.id && (
                 <div className="mt-6 space-y-6 border-t pt-4">
                   {/* FEEDBACK */}
@@ -101,7 +121,9 @@ const Reviews = () => {
                     <h3 className="font-semibold flex items-center gap-2 text-gray-800">
                       <FileSearch size={18} /> Detailed Feedback
                     </h3>
-                    <p className="text-gray-700 mt-2">{review.details.feedback}</p>
+                    <p className="text-gray-700 mt-2">
+                      {review.details.feedback}
+                    </p>
                   </div>
 
                   {/* REQUIRED CORRECTIONS */}
@@ -111,8 +133,8 @@ const Reviews = () => {
                         <AlertTriangle size={18} /> Required Corrections
                       </h3>
                       <ul className="list-disc ml-6 mt-2 text-gray-700">
-                        {review.details.corrections.map((c, i) => (
-                          <li key={i}>{c}</li>
+                        {review.details.corrections.map((item, i) => (
+                          <li key={i}>{item}</li>
                         ))}
                       </ul>
                     </div>
@@ -124,15 +146,15 @@ const Reviews = () => {
                       <CheckCircle2 size={18} /> Suggestions
                     </h3>
                     <ul className="list-disc ml-6 mt-2 text-gray-700">
-                      {review.details.suggestions.map((s, i) => (
-                        <li key={i}>{s}</li>
+                      {review.details.suggestions.map((item, i) => (
+                        <li key={i}>{item}</li>
                       ))}
                     </ul>
                   </div>
 
-                  {/* READ-ONLY NOTICE */}
                   <p className="text-xs text-gray-500 italic">
-                    *This review is read-only. You cannot modify UGC/AICTE evaluations.
+                    *This review is read-only. You cannot modify UGC/AICTE
+                    evaluations.
                   </p>
                 </div>
               )}
@@ -140,7 +162,7 @@ const Reviews = () => {
           ))}
         </div>
       </div>
-    </div>
+    </Layout>
   );
 };
 

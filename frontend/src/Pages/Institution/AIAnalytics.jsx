@@ -1,17 +1,27 @@
 import React from "react";
-import Sidebar from "../../Components/Sidebar";
-import { Bot, AlertTriangle, CheckCircle, Info, TrendingUp, FileDown } from "lucide-react";
+import Layout from "../../Components/Layout";
+import StepProgress from "../../Components/StepProgress";
+import {
+  Bot,
+  AlertTriangle,
+  CheckCircle,
+  Info,
+  TrendingUp,
+  FileDown,
+} from "lucide-react";
 
 const AIAnalytics = () => {
   return (
-    <div className="flex bg-gray-100 min-h-screen">
-      <Sidebar />
+    <Layout showNavbar={false}>
+      <StepProgress currentStep={7} />
 
       <div className="w-full p-10 space-y-10">
-
         {/* PAGE TITLE */}
-        <h1 className="text-3xl font-bold">AI Analytics</h1>
-        <p className="text-gray-600">AI-based evaluation of your institution data, documents, and compliance.</p>
+     
+        <p className="text-gray-600">
+          AI-based evaluation of your institution data, documents, and
+          compliance.
+        </p>
 
         {/* AI SCORE CARD */}
         <div className="bg-white shadow-xl rounded-xl p-6 border-l-8 border-purple-600">
@@ -21,7 +31,8 @@ const AIAnalytics = () => {
 
           <p className="text-5xl font-extrabold text-green-600 mt-3">86%</p>
           <p className="text-gray-600 mt-2">
-            The AI score is based on consistency of documents, parameters, data accuracy, and compliance rules.
+            The AI score is based on consistency of documents, parameters, data
+            accuracy, and compliance rules.
           </p>
         </div>
 
@@ -31,11 +42,13 @@ const AIAnalytics = () => {
             { title: "Documents", score: 92 },
             { title: "Parameters", score: 78 },
             { title: "Infrastructure", score: 81 },
-            { title: "Faculty", score: 65 }
+            { title: "Faculty", score: 65 },
           ].map((item, index) => (
-            <div key={index} className="bg-white shadow rounded-xl p-4 text-center">
+            <div className="bg-white shadow rounded-xl p-4 text-center" key={index}>
               <h3 className="text-lg font-semibold">{item.title}</h3>
-              <p className="text-3xl font-bold text-blue-600 mt-2">{item.score}%</p>
+              <p className="text-3xl font-bold text-blue-600 mt-2">
+                {item.score}%
+              </p>
             </div>
           ))}
         </div>
@@ -45,13 +58,24 @@ const AIAnalytics = () => {
           <h2 className="text-xl font-semibold mb-4">Data Consistency Check</h2>
 
           <ul className="space-y-3 text-gray-700">
-            <li className="flex items-center gap-2"><CheckCircle className="text-green-600" /> Student strength matches enrollment report.</li>
-            <li className="flex items-center gap-2"><CheckCircle className="text-green-600" /> Faculty count consistent across documents.</li>
-            <li className="flex items-center gap-2"><AlertTriangle className="text-red-500" /> Lab area mismatch detected (AI flagged).</li>
-            <li className="flex items-center gap-2"><CheckCircle className="text-green-600" /> Financial audit records are consistent.</li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="text-green-600" /> Student strength matches
+              enrollment report.
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="text-green-600" /> Faculty count consistent
+              across documents.
+            </li>
+            <li className="flex items-center gap-2">
+              <AlertTriangle className="text-red-500" /> Lab area mismatch detected
+              (AI flagged).
+            </li>
+            <li className="flex items-center gap-2">
+              <CheckCircle className="text-green-600" /> Financial audit records are
+              consistent.
+            </li>
           </ul>
         </div>
-
 
         {/* RED FLAG ALERTS */}
         <div className="bg-white shadow rounded-xl p-6 border-l-8 border-red-500">
@@ -61,7 +85,8 @@ const AIAnalytics = () => {
 
           <div className="mt-4 space-y-3">
             <p className="bg-red-100 p-3 rounded-lg">
-              ⚠️ <b>Infrastructure mismatch:</b> Document shows 3500 sq ft, parameter says 1500 sq ft.
+              ⚠️ <b>Infrastructure mismatch:</b> Document shows 3500 sq ft, parameter
+              says 1500 sq ft.
             </p>
             <p className="bg-yellow-100 p-3 rounded-lg">
               ⚠️ <b>Faculty mismatch:</b> 2 PhDs required, document shows only 1.
@@ -74,7 +99,9 @@ const AIAnalytics = () => {
 
         {/* AI CROSS-CHECK TABLE */}
         <div className="bg-white shadow rounded-xl p-6">
-          <h2 className="text-xl font-semibold mb-4">Document–Parameter Cross Check</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Document–Parameter Cross Check
+          </h2>
 
           <table className="w-full border">
             <thead className="bg-gray-200 font-semibold">
@@ -97,14 +124,15 @@ const AIAnalytics = () => {
                 <td className="p-3">Faculty PhD Count</td>
                 <td className="p-3">2</td>
                 <td className="p-3">1</td>
-                <td className="p-3 text-yellow-600 font-semibold">Partial Match</td>
+                <td className="p-3 text-yellow-600 font-semibold">
+                  Partial Match
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
 
-
-        {/* HISTORICAL TREND */}
+        {/* TREND */}
         <div className="bg-white shadow rounded-xl p-6">
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <TrendingUp className="text-blue-600" /> AI Trend (Last 3 Years)
@@ -131,9 +159,8 @@ const AIAnalytics = () => {
         <button className="bg-purple-700 hover:bg-purple-800 text-white px-6 py-3 rounded-lg flex items-center gap-2">
           <FileDown /> Download Full AI Report (PDF)
         </button>
-
       </div>
-    </div>
+    </Layout>
   );
 };
 
