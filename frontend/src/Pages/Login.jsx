@@ -60,7 +60,7 @@ const Login = () => {
       description: "Smart analytics & predictions"
     },
     {
-      icon: Lock,
+      icon: Lock, 
       title: "Military-Grade Security",
       description: "End-to-end encryption"
     }
