@@ -10,6 +10,9 @@ import InstitutionParameterRoutes from './routes/institution_parameter.route.js'
 import DocumentRoutes from './routes/document.route.js';
 import ApplicationRoutes from './routes/application.route.js';
 
+import AIAnalysisRoutes from "./routes/ai_analysis.route.js";
+import AIReportRoutes from "./routes/ai_report.route.js";
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -35,6 +38,9 @@ app.use("/api/institution",InstitutionRoutes);
 app.use("/api/institutionparameter",InstitutionParameterRoutes);
 app.use('/api/documents',DocumentRoutes);
 app.use("/api/application",ApplicationRoutes);
+
+app.use("/api/ai-analysis", AIAnalysisRoutes);
+app.use("/api/ai-report", AIReportRoutes);
 
 app.get("/",(req,res)=>{
     res.send("Server is running");

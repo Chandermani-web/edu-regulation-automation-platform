@@ -70,7 +70,7 @@ export const createApplicationManually = asyncHandler(async (req, res) => {
 });
 
 export const getApplication = asyncHandler(async (req, res) => {
-  const { institution_id } = req.query;
+  const { institution_id } = req.body;
 
   if (!institution_id) {
     return res.status(400).json({
@@ -81,7 +81,7 @@ export const getApplication = asyncHandler(async (req, res) => {
 
   const app = await Application.findOne({ institution_id })
     .populate("submitted_by", "name email role")
-    .populate("institution_id", "name code type");
+    .populate("institution_id", "name type state district website established_year total_students total_faculty");
 
   if (!app) {
     return res.status(404).json({
@@ -133,7 +133,7 @@ export const getAllApplications = asyncHandler(async (req, res) => {
   // Fetch Applications
   // -------------------------
   const apps = await Application.find(filter)
-    .populate("institution_id", "name code address type")
+    .populate("institution_id", "name type state district website established_year total_students total_faculty")
     .populate("submitted_by", "name email role")
     .sort({ submitted_at: -1 }); // newest first
 

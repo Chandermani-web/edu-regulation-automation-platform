@@ -1,8 +1,9 @@
 import { asyncHandler } from '../services/asyncHandler.js';
 import Institution from '../models/institution.model.js';
 import Parameter from '../models/institution_parameter.model.js';
+import Document from '../models/document.model.js';
 
-export const createInstitute = asyncHandler(async (req,res) => {
+export const createInstitute = asyncHandler(async (req, res) => {
     const {
         name,
         type,
@@ -16,9 +17,20 @@ export const createInstitute = asyncHandler(async (req,res) => {
         accreditation_status,
     } = req.body;
 
-    const existingInstitute = await Institution.findOne({ name, state, website, district, address, established_year, type })
+    const existingInstitute = await Institution.findOne({
+        name,
+        state,
+        website,
+        district,
+        address,
+        established_year,
+        type,
+    });
 
-    if(existingInstitute) return res.status(404).json({message: "Institution is already exist"})
+    if (existingInstitute)
+        return res
+            .status(404)
+            .json({ message: 'Institution is already exist' });
 
     const institution = await Institution.create({
         user_id: req.user.id,
@@ -41,12 +53,19 @@ export const createInstitute = asyncHandler(async (req,res) => {
     });
 });
 
-export const getInstituteByUser = asyncHandler(async (req,res) => {
-    const data = await Institution.findOne({ user_id: req.user.id }).populate("parameters");
+export const getInstituteByUser = asyncHandler(async (req, res) => {
+    const data = await Institution.findOne({ user_id: req.user.id }).populate(
+        'parameters',
+        '_id parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
+    )
+    .populate(
+            'documents',
+            'title file_url public_id category, uploaded_by upliaded_at'
+    );
     return res.status(201).json({ success: true, data });
 });
 
-export const updateInstitute = asyncHandler(async (req,res) => {
+export const updateInstitute = asyncHandler(async (req, res) => {
     const {
         name,
         state,
@@ -86,10 +105,19 @@ export const updateInstitute = asyncHandler(async (req,res) => {
     });
 });
 
-export const getAllInstitute = asyncHandler(async (req,res) => {
-    const institutes = await Institution.find().populate("parameters", "parameter_category parameter_name norm_value institution_value authority criticality is_compliant")
+export const getAllInstitute = asyncHandler(async (req, res) => {
+    const institutes = await Institution.find()
+        .populate(
+            'parameters',
+            'parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
+        )
+        .populate(
+            'documents',
+            'title file_url public_id category, uploaded_by upliaded_at'
+        );
 
-    if(!institutes) return res.status(404).json({ message: "Institutes not found" })
+    if (!institutes)
+        return res.status(404).json({ message: 'Institutes not found' });
 
     res.status(200).json(institutes);
-})
+});

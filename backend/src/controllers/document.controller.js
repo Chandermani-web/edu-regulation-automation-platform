@@ -5,10 +5,14 @@ import Application from '../models/application.model.js';
 
 // create the document
 export const uploadDocument = asyncHandler(async (req, res) => {
-    const { institutionId, applicationId, title, category } = req.body;
+    const { institution_id, applicationId, title, category } = req.body;
     const file = req.file;
 
-    if (!institutionId)
+    console.log(req.file);
+    console.log(req.body);
+
+
+    if (!institution_id)
         return res
             .status(400)
             .json({ ok: false, message: 'institutionId is required' });
@@ -17,7 +21,7 @@ export const uploadDocument = asyncHandler(async (req, res) => {
         return res.status(400).json({ ok: false, message: 'No file uploaded' });
 
     const uploadResult = await cloudinary.uploader.upload_stream(
-        { folder: `sih/institution/${institutionId}`, resource_type: 'auto' },
+        { folder: `sih/institution/${institution_id}`, resource_type: 'auto' },
         (err, result) => {
             if (err) throw err;
             return result;
@@ -25,7 +29,7 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     );
 
     const doc = await Document.create({
-        institution_id: institutionId,
+        institution_id: institution_id,
         application_id: applicationId || null,
         title: title || file.originalname || 'document',
         file_url: uploadResult.secure_url,
@@ -88,15 +92,17 @@ export const deleteDocument = asyncHandler(async (req, res) => {
 
 // get the document
 export const getDocumentsByInstitution = asyncHandler(async (req, res) => {
-    // const { institutionId } = req.body; // or req.query if GET request
-    const { institutionId } = req.query;
+    const { institution_id } = req.body; // or req.query if GET request
+    // const { institutionId } = req.query;
 
-    if (!institutionId)
+    console.log("Body:", req.body);
+
+    if (!institution_id)
         return res
             .status(400)
             .json({ success: false, message: 'institutionId is required' });
 
-    const documents = await Document.find({ institution_id: institutionId })
+    const documents = await Document.find({ institution_id: institution_id })
         .populate('uploaded_by', 'name email role')
         .populate('application', 'status submitted_at'); // optional
 

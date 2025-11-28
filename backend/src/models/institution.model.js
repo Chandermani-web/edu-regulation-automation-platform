@@ -19,7 +19,8 @@ const institutionSchema = new mongoose.Schema({
   website: String,
   accreditation_status: String,
 
-  parameters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parameter' }]
+  parameters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parameter' }],
+  documents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Documents' }]
 }, { timestamps: true });
 
 const Institution = mongoose.model('Institution', institutionSchema);

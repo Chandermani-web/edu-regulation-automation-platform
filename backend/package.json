@@ -25,6 +25,7 @@
     "multer": "^2.0.2",
     "multer-storage-cloudinary": "^4.0.0",
     "nodemon": "^3.1.11",
+    "pdfkit": "^0.17.2",
     "prettier": "^3.6.2",
     "socket.io": "^4.8.1",
     "xlsx": "^0.18.5"
