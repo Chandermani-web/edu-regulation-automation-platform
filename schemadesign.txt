@@ -1,0 +1,114 @@
+/////////////////////////////////////////////////////////
+// USERS
+/////////////////////////////////////////////////////////
+
+Table users {
+  id int [pk, increment]
+  name varchar
+  email varchar [unique]
+  password varchar
+  role varchar   // institution, ugc, aicte
+  created_at datetime
+}
+
+/////////////////////////////////////////////////////////
+// INSTITUTION (GROUPED BOX)
+/////////////////////////////////////////////////////////
+
+Table institutions {
+  id int [pk, increment]
+  user_id int [ref: > users.id]
+
+  // BASIC INFO
+  name varchar
+  type varchar          // college, university
+  state varchar
+  district varchar
+  address text
+  established_year int
+
+  // PROFILE
+  total_students int
+  total_faculty int
+  website varchar
+  accreditation_status varchar
+}
+
+/////////////////////////////////////////////////////////
+// 23 AICTE PARAMETERS
+/////////////////////////////////////////////////////////
+
+Table institution_parameters {
+  id int [pk, increment]
+  institution_id int [ref: > institutions.id]
+  parameter_category varchar
+  parameter_name varchar
+  norm_value varchar
+  institution_value varchar
+  authority varchar
+  criticality varchar
+  is_compliant boolean
+}
+
+/////////////////////////////////////////////////////////
+// DOCUMENTS
+/////////////////////////////////////////////////////////
+
+Table documents {
+  id int [pk, increment]
+  institution_id int [ref: > institutions.id]
+  application_id int [ref: > applications.id]
+  title varchar
+  file_url varchar
+  category varchar
+  uploaded_at datetime
+}
+
+/////////////////////////////////////////////////////////
+// APPLICATION WORKFLOW
+/////////////////////////////////////////////////////////
+
+Table applications {
+  id int [pk, increment]
+  institution_id int [ref: > institutions.id]
+  status varchar      // submitted, under_review, approved, rejected
+  submitted_at datetime
+}
+
+Table application_reviews {
+  id int [pk, increment]
+  application_id int [ref: > applications.id]
+  reviewer_id int [ref: > users.id]
+  comments text
+  status varchar       // accepted, rejected, changes_required
+  reviewed_at datetime
+}
+
+Table queries {
+  id int [pk, increment]
+  application_id int [ref: > applications.id]
+  raised_by int [ref: > users.id]
+  query_text text
+  reply_text text
+}
+
+/////////////////////////////////////////////////////////
+// AI ANALYSIS
+/////////////////////////////////////////////////////////
+
+Table ai_analysis {
+  id int [pk, increment]
+  application_id int [ref: > applications.id]
+  parameter_compliance_score float
+  document_completeness float
+  risk_score float
+  generated_at datetime
+}
+
+Table ai_reports {
+  id int [pk, increment]
+  application_id int [ref: > applications.id]
+  report_title varchar
+  report_url varchar
+  created_at datetime
+}
