@@ -1,159 +1,286 @@
+// src/Pages/Institution/DocumentUpload.jsx
 import React, { useState } from "react";
-import Sidebar from "../../Components/Sidebar";
-import { Upload, FileText, CheckCircle, Clock, AlertCircle, History, Signature } from "lucide-react";
+import Layout from "../../Components/Layout";
+import StepProgress from "../../Components/StepProgress";
+import { FileText, History, CheckCircle, Clock, AlertCircle, ImageIcon, Paperclip } from "lucide-react";
 
-const DocumentUpload = () => {
 
-  // ------------ Document Upload State ------------
-  const [documents, setDocuments] = useState({
-    mandatory: { file: null, status: "Pending", history: [] },
-    academic: { file: null, status: "Pending", history: [] },
-    admin: { file: null, status: "Pending", history: [] },
-    infra: { file: null, status: "Pending", history: [] },
-    finance: { file: null, status: "Pending", history: [] },
-    faculty: { file: null, status: "Pending", history: [] },
-    annual: { file: null, status: "Pending", history: [] }
-  });
+const CATEGORIES = [
+  { key: "mandatory", label: "Mandatory Documents" },
+  { key: "academic", label: "Academic Documents" },
+  { key: "admin", label: "Administrative Records" },
+  { key: "infra", label: "Infrastructure Proofs" },
+  { key: "finance", label: "Financial Documents" },
+  { key: "faculty", label: "Faculty CVs" },
+  { key: "annual", label: "Annual Reports" },
+];
+
+const STATUS_STYLES = {
+  Verified: "bg-green-100 text-green-800 border-green-200",
+  Pending: "bg-yellow-100 text-yellow-800 border-yellow-200",
+  "Re-upload Requested": "bg-red-100 text-red-800 border-red-200",
+};
+
+export default function DocumentUpload() {
+  // documents state: one entry per category with file, status, history
+  const [documents, setDocuments] = useState(() =>
+    CATEGORIES.reduce((acc, c) => {
+      acc[c.key] = { file: null, status: "Pending", history: [] };
+      return acc;
+    }, {})
+  );
 
   const [digitalSignature, setDigitalSignature] = useState(null);
 
-  // ------------ Handle File Upload ------------
-  const handleUpload = (category, file) => {
-    const newRecord = {
-      fileName: file.name,
-      uploadedOn: new Date().toLocaleString(),
-      status: "Pending"
-    };
+  // Accept only these mime types / extensions
+  const ACCEPTED_TYPES = [
+    "application/pdf",
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+  ];
 
+  // Handle a new uploaded file for a category
+  const handleUpload = (categoryKey, file) => {
+    if (!file) return;
+
+    if (!ACCEPTED_TYPES.includes(file.type)) {
+      alert("Only PDF / JPG / PNG files are allowed.");
+      return;
+    }
+
+    setDocuments((prev) => {
+      const prevCat = prev[categoryKey];
+      const newRecord = {
+        fileName: file.name,
+        uploadedOn: new Date().toLocaleString(),
+        status: "Pending",
+      };
+
+      return {
+        ...prev,
+        [categoryKey]: {
+          file,
+          status: "Pending",
+          history: [...prevCat.history, newRecord],
+        },
+      };
+    });
+  };
+
+  // Preview file in new tab/window
+  const previewFile = (file) => {
+    if (!file) return;
+    const url = URL.createObjectURL(file);
+    window.open(url, "_blank");
+    // revokeObjectURL later not necessary here (browser will cleanup),
+    // or you can revoke after a short timeout if preferred:
+    setTimeout(() => URL.revokeObjectURL(url), 10000);
+  };
+
+  // Manually change status for demo/testing (in real app status will come from backend)
+  const setStatus = (categoryKey, status) => {
     setDocuments((prev) => ({
       ...prev,
-      [category]: {
-        file: file,
-        status: "Pending",
-        history: [...prev[category].history, newRecord]
-      }
+      [categoryKey]: {
+        ...prev[categoryKey],
+        status,
+        history: prev[categoryKey].history.map((h, i) =>
+          i === prev[categoryKey].history.length - 1 ? { ...h, status } : h
+        ),
+      },
     }));
   };
 
-  // ------------ Render Status Badge ------------
-  const StatusBadge = ({ status }) => {
-    const styles = {
-      Verified: "bg-green-100 text-green-700 border-green-400",
-      Pending: "bg-yellow-100 text-yellow-700 border-yellow-400",
-      "Re-upload Requested": "bg-red-100 text-red-700 border-red-400",
-    };
-
-    const icons = {
-      Verified: <CheckCircle size={16} />,
-      Pending: <Clock size={16} />,
-      "Re-upload Requested": <AlertCircle size={16} />,
-    };
-
-    return (
-      <span className={`border px-2 py-1 text-sm rounded flex items-center gap-1 ${styles[status]}`}>
-        {icons[status]} {status}
-      </span>
-    );
+  // Upload digital signature
+  const handleSignature = (file) => {
+    if (!file) return;
+    if (!["image/png", "image/jpg", "image/jpeg"].includes(file.type)) {
+      alert("Signature must be an image (PNG/JPG).");
+      return;
+    }
+    setDigitalSignature(file);
   };
 
-  // ------------ Upload Card Component ------------
-  const UploadCard = ({ title, category }) => {
-    const data = documents[category];
-
-    return (
-      <div className="bg-white shadow-md rounded-xl p-6 mb-6 border">
-        <h3 className="text-xl font-semibold flex items-center gap-2 mb-3">
-          <FileText className="text-blue-700" /> {title}
-        </h3>
-
-        {/* File Input */}
-        <input
-          type="file"
-          accept=".pdf,.jpg,.png"
-          className="border p-2 rounded w-full"
-          onChange={(e) => handleUpload(category, e.target.files[0])}
-        />
-
-        {/* Current Status */}
-        <div className="mt-3">
-          <b>Status:</b> <StatusBadge status={data.status} />
-        </div>
-
-        {/* File Preview */}
-        {data.file && (
-          <div className="mt-4 bg-gray-50 p-4 rounded-lg border">
-            <p className="font-medium">📄 {data.file.name}</p>
-            <p className="text-gray-600 text-sm">{(data.file.size / 1024).toFixed(2)} KB</p>
-
-            <button className="mt-3 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
-              Preview
-            </button>
-          </div>
-        )}
-
-        {/* Version History */}
-        <div className="mt-5">
-          <h4 className="font-semibold flex items-center gap-2">
-            <History size={18} /> Version History
-          </h4>
-
-          <ul className="mt-2 text-sm text-gray-700">
-            {data.history.length === 0 && <li>No uploads yet</li>}
-
-            {data.history.map((item, index) => (
-              <li key={index} className="border-b py-2">
-                <b>{item.fileName}</b> — {item.uploadedOn}  
-                <br />
-                <StatusBadge status={item.status} />
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-    );
-  };
+  // Small helper to render status badge
+  const StatusBadge = ({ status }) => (
+    <span
+      className={`inline-flex items-center gap-2 px-3 py-1 rounded-full text-sm font-semibold border ${STATUS_STYLES[status] || STATUS_STYLES.Pending}`}
+    >
+      {status === "Verified" ? <CheckCircle size={14} /> : status === "Pending" ? <Clock size={14} /> : <AlertCircle size={14} />}
+      {status}
+    </span>
+  );
 
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+    <Layout showNavbar={false}>
+      <StepProgress currentStep={3} />
 
-      <div className="w-full p-10">
-        <h1 className="text-3xl font-bold mb-6">Document Upload</h1>
-        <p className="text-gray-600 mb-8">
-          Upload all required documents. Only PDF / JPG / PNG formats allowed.
+      <div className="max-w-6xl mx-auto p-6">
+      
+        <p className="text-gray-600 mb-6">
+          Upload single file for each required category. Allowed: PDF / JPG / PNG.
+          <br />
+          Use preview to view uploads. Status and version history are shown per category.
         </p>
 
-        {/* All Document Upload Cards */}
-        <UploadCard title="Mandatory Documents" category="mandatory" />
-        <UploadCard title="Academic Documents" category="academic" />
-        <UploadCard title="Administrative Records" category="admin" />
-        <UploadCard title="Infrastructure Proofs" category="infra" />
-        <UploadCard title="Financial Documents" category="finance" />
-        <UploadCard title="Faculty CVs" category="faculty" />
-        <UploadCard title="Annual Reports" category="annual" />
+        {/* Upload cards */}
+        <div className="grid grid-cols-1 gap-6">
+          {CATEGORIES.map((cat) => {
+            const data = documents[cat.key];
+            return (
+              <div key={cat.key} className="bg-white p-6 rounded-xl shadow border">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-semibold flex items-center gap-2">
+                    <FileText className="text-indigo-600" /> {cat.label}
+                  </h3>
 
-        {/* Digital Signature Section */}
-        <div className="bg-white shadow-md rounded-xl p-6 border mt-10">
-          <h3 className="text-xl font-semibold flex items-center gap-2 mb-3">
-            <Signature className="text-purple-700" /> Digital Signature
-          </h3>
+                  <div className="flex items-center gap-3">
+                    <StatusBadge status={data.status} />
+                    {/* Quick status toggles for demo/testing */}
+                    <div className="hidden sm:flex items-center gap-2">
+                      <button
+                        onClick={() => setStatus(cat.key, "Verified")}
+                        className="text-sm px-2 py-1 rounded border hover:bg-green-50"
+                        title="Mark Verified"
+                      >
+                        Verify
+                      </button>
+                      <button
+                        onClick={() => setStatus(cat.key, "Re-upload Requested")}
+                        className="text-sm px-2 py-1 rounded border hover:bg-red-50"
+                        title="Request Re-upload"
+                      >
+                        Re-upload
+                      </button>
+                    </div>
+                  </div>
+                </div>
 
-          <input
-            type="file"
-            accept=".png,.jpg"
-            className="border p-2 rounded w-full"
-            onChange={(e) => setDigitalSignature(e.target.files[0])}
-          />
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4 items-start">
+                  {/* file input */}
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Select file</label>
+                    <div className="flex gap-3">
+                      <input
+                        type="file"
+                        accept=".pdf,.jpg,.jpeg,.png"
+                        onChange={(e) => handleUpload(cat.key, e.target.files[0])}
+                        className="block w-full text-sm text-gray-700 border rounded p-2"
+                      />
+                      <button
+                        onClick={() => data.file && previewFile(data.file)}
+                        disabled={!data.file}
+                        className={`px-4 py-2 rounded text-white font-semibold ${data.file ? "bg-indigo-600 hover:bg-indigo-700" : "bg-gray-300 cursor-not-allowed"}`}
+                      >
+                        Preview
+                      </button>
+                    </div>
 
-          {digitalSignature && (
-            <p className="mt-3 text-green-700 font-medium">
-              ✔ Signature uploaded: {digitalSignature.name}
+                    {/* small details */}
+                    <div className="mt-3 text-sm text-gray-600">
+                      <div>
+                        {data.file ? (
+                          <>
+                            <span className="font-medium">{data.file.name}</span>
+                            <span className="ml-3 text-xs text-gray-500">({(data.file.size / 1024).toFixed(0)} KB)</span>
+                          </>
+                        ) : (
+                          <span>No file selected</span>
+                        )}
+                      </div>
+                      <div className="mt-1">Allowed: PDF / JPG / PNG</div>
+                    </div>
+                  </div>
+
+                  {/* version history */}
+                  <div className="bg-gray-50 border rounded p-4">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold">Version history</h4>
+                      <History size={16} />
+                    </div>
+
+                    <ul className="mt-3 text-sm space-y-2 max-h-36 overflow-auto pr-2">
+                      {data.history.length === 0 ? (
+                        <li className="text-gray-500">No uploads yet</li>
+                      ) : (
+                        data.history.slice().reverse().map((h, idx) => (
+                          <li key={idx} className="flex items-start justify-between gap-2 border-b pb-2">
+                            <div>
+                              <div className="font-medium">{h.fileName}</div>
+                              <div className="text-xs text-gray-500">{h.uploadedOn}</div>
+                            </div>
+                            <div className="text-right">
+                              <span className="inline-block text-xs px-2 py-1 rounded-full bg-gray-100 border">{h.status || "Pending"}</span>
+                              <div className="mt-1">
+                                <button
+                                  onClick={() => {
+                                    // preview historic file metadata: we do not store blobs for older versions in this simple UI
+                                    alert("To preview older versions, integrate backend version storage (frontend placeholder).");
+                                  }}
+                                  className="text-xs text-indigo-600 underline"
+                                >
+                                  View
+                                </button>
+                              </div>
+                            </div>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Digital signature */}
+        <div className="mt-8 bg-white p-6 rounded-xl shadow border flex flex-col md:flex-row items-start gap-6">
+          <div className="flex-1">
+            <h3 className="text-lg font-semibold flex items-center gap-2">
+              <Paperclip className="text-purple-600" /> Digital Signature
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              Upload your official signature image (PNG / JPG). This will be used while generating certificates/reports.
             </p>
-          )}
+            <div className="mt-4 flex items-center gap-4">
+              <input
+                type="file"
+                accept=".png,.jpg,.jpeg"
+                onChange={(e) => handleSignature(e.target.files[0])}
+                className="border rounded p-2"
+              />
+              {digitalSignature ? (
+                <div className="flex items-center gap-3">
+                  <div className="w-28 h-12 border rounded overflow-hidden bg-white">
+                    <img
+                      src={URL.createObjectURL(digitalSignature)}
+                      alt="signature"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <div className="text-sm">
+                    <div className="font-medium">{digitalSignature.name}</div>
+                    <div className="text-xs text-gray-500">{(digitalSignature.size / 1024).toFixed(0)} KB</div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-gray-500">No signature uploaded</div>
+              )}
+            </div>
+          </div>
+
+          <div className="w-full md:w-56 flex-shrink-0">
+            <button
+              onClick={() => alert("In a real app this would upload all docs & signatures to backend.")}
+              className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold"
+            >
+              Save All Uploads
+            </button>
+          </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
-};
-
-export default DocumentUpload;
+}

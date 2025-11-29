@@ -1,193 +1,114 @@
-import React, { useState } from "react";
-import Sidebar from "../../Components/Sidebar";
-import { Upload, AlertTriangle, Save } from "lucide-react";
+import React from "react";
+import Layout from "../../Components/Layout";
+import StepProgress from "../../Components/StepProgress";
+import { AlertTriangle, Save } from "lucide-react";
 
 const ParametersEntry = () => {
+  
+  const parameterData = [
+    {
+      category: "Land Requirement",
+      items: [
+        { name: "Total Land Area (Rural)", norm: "7.5 Acres", authority: "AICTE", critical: "Mandatory" },
+        { name: "Total Land Area (Urban/Mega City)", norm: "2.5 Acres", authority: "AICTE", critical: "Mandatory" },
+        { name: "Land Continuity", norm: "Contiguous (Single Plot preferred)", authority: "AICTE", critical: "Critical" },
+        { name: "Land Ownership", norm: "Registered Sale Deed / Gift Deed", authority: "AICTE", critical: "Mandatory" },
+        { name: "Land Use Certificate (LUC)", norm: "Issued by Competent Authority", authority: "AICTE", critical: "Mandatory" },
+      ],
+    },
+
+    {
+      category: "Instructional Area",
+      items: [
+        { name: "Classrooms (UG)", norm: "1 per Division (66 sq.m each)", authority: "AICTE", critical: "Mandatory" },
+        { name: "Tutorial Rooms (UG)", norm: "1 per 4 Divisions (33 sq.m each)", authority: "AICTE", critical: "Mandatory" },
+        { name: "Laboratories (UG)", norm: "Min 5 Labs per Course (66 sq.m each)", authority: "AICTE", critical: "Critical" },
+        { name: "Workshop/Manufacturing Lab", norm: "200 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Drawing Hall", norm: "132 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Seminar Hall", norm: "132 sq.m (Min 1)", authority: "AICTE", critical: "Desired" },
+      ],
+    },
+
+    {
+      category: "Admin Area",
+      items: [
+        { name: "Principal/Director Office", norm: "30 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Board Room", norm: "20 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Faculty Cabin", norm: "5 sq.m per faculty", authority: "AICTE", critical: "Mandatory" },
+        { name: "Central Store", norm: "30 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Exam Control Office", norm: "30 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Placement Office", norm: "30 sq.m", authority: "AICTE", critical: "Mandatory" },
+      ],
+    },
+
+    {
+      category: "Amenities Area",
+      items: [
+        { name: "Toilets (Gents/Ladies)", norm: "350 sq.m total (Separate required)", authority: "AICTE", critical: "Mandatory" },
+        { name: "Boys Common Room", norm: "75 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Girls Common Room", norm: "75 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "Cafeteria", norm: "150 sq.m", authority: "AICTE", critical: "Mandatory" },
+        { name: "First Aid / Sick Room", norm: "10 sq.m", authority: "AICTE", critical: "Mandatory" },
+      ],
+    },
+  ];
+
   return (
-    <div className="flex min-h-screen bg-gray-100">
-      <Sidebar />
+    <Layout showNavbar={false}>
+      <StepProgress currentStep={2} />
 
-      <div className="w-full p-10">
-        <h1 className="text-3xl font-bold mb-4 text-[#0A3D62]">
-          Parameters Entry
-        </h1>
-        <p className="text-gray-600 mb-6">
-          Fill all required parameters for UGC / AICTE approval.
-          <br />
-          Data auto-saves section-wise.
-        </p>
+      
+      <p className="text-gray-600 mb-6">
+        Fill all required parameters for UGC / AICTE approval.
+        <br />
+        Data auto-saves section-wise.
+      </p>
 
-        {/* ----------- 1. STUDENT STRENGTH ----------- */}
-        <section className="bg-white shadow rounded-xl p-6 mb-10">
+      {/*  AUTO GENERATED PARAMETER SECTIONS */}
+      {parameterData.map((section, index) => (
+        <section
+          key={index}
+          className="bg-white shadow rounded-xl p-6 mb-10 border border-gray-200"
+        >
           <h2 className="text-xl font-semibold mb-4 text-[#5A189A]">
-            Student Strength
+            {section.category}
           </h2>
 
-          <div className="space-y-4">
-            <div>
-              <label className="font-semibold text-gray-700">
-                Total Students
-              </label>
-              <input
-                className="w-full border p-3 rounded mt-1"
-                placeholder="Enter number"
-              />
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {section.items.map((item, idx) => (
+              <div key={idx}>
+                <label className="font-semibold text-gray-800">
+                  {item.name}
+                </label>
 
-            <div>
-              <label className="font-semibold text-gray-700">UG Students</label>
-              <input
-                className="w-full border p-3 rounded mt-1"
-                placeholder="Enter number"
-              />
-            </div>
+                <input
+                  className="w-full border p-3 rounded mt-1 focus:ring-2 focus:ring-[#5A189A]"
+                  placeholder={`Norm: ${item.norm}`}
+                />
 
-            <div>
-              <label className="font-semibold text-gray-700">PG Students</label>
-              <input
-                className="w-full border p-3 rounded mt-1"
-                placeholder="Enter number"
-              />
-            </div>
+                <p className="text-xs mt-1 text-gray-500">
+                  Authority: <b>{item.authority}</b> | Criticality:{" "}
+                  <span
+                    className={
+                      item.critical === "Critical"
+                        ? "text-red-600"
+                        : "text-blue-600"
+                    }
+                  >
+                    {item.critical}
+                  </span>
+                </p>
+              </div>
+            ))}
           </div>
         </section>
+      ))}
 
-        {/* ----------- 2. FACULTY DETAILS ----------- */}
-        <section className="bg-white shadow rounded-xl p-6 mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-[#5A189A]">
-            Faculty Details
-          </h2>
-
-          <div className="grid grid-cols-3 gap-6">
-            <input className="border p-3 rounded" placeholder="Total Faculty" />
-            <input
-              className="border p-3 rounded"
-              placeholder="Teaching Faculty"
-            />
-            <input className="border p-3 rounded" placeholder="PhD Faculty" />
-            <input
-              className="border p-3 rounded"
-              placeholder="Technical Staff"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="Non-Teaching Staff"
-            />
-          </div>
-
-          {/* Upload Document */}
-          <div className="mt-4">
-            <label className="font-semibold">Upload Supporting Document</label>
-            <div className="flex items-center gap-3 mt-2">
-              <input type="file" className="border p-2 rounded" />
-              <Upload className="text-gray-600" />
-            </div>
-          </div>
-        </section>
-
-        {/* ----------- 3. INFRASTRUCTURE ----------- */}
-        <section className="bg-white shadow rounded-xl p-6 mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-[#5A189A]">
-            Infrastructure
-          </h2>
-
-          <div className="grid grid-cols-3 gap-6">
-            <input
-              className="border p-3 rounded"
-              placeholder="Total Classrooms"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="Smart Classrooms"
-            />
-            <input className="border p-3 rounded" placeholder="Laboratories" />
-            <input
-              className="border p-3 rounded"
-              placeholder="Library Books Count"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="Library Area (sq ft)"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="ICT Enabled Rooms"
-            />
-          </div>
-        </section>
-
-        {/* ----------- 4. FINANCIAL DETAILS ----------- */}
-        <section className="bg-white shadow rounded-xl p-6 mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-[#5A189A]">
-            Financial Details
-          </h2>
-
-          <div className="grid grid-cols-3 gap-6">
-            <input className="border p-3 rounded" placeholder="Annual Budget" />
-            <input
-              className="border p-3 rounded"
-              placeholder="Funds Received"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="Funds Utilized"
-            />
-          </div>
-        </section>
-
-        {/* ----------- 5. PLACEMENT DETAILS ----------- */}
-        <section className="bg-white shadow rounded-xl p-6 mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-[#5A189A]">
-            Placement Statistics
-          </h2>
-
-          <div className="grid grid-cols-3 gap-6">
-            <input
-              className="border p-3 rounded"
-              placeholder="Total Students Placed"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="Highest Package"
-            />
-            <input
-              className="border p-3 rounded"
-              placeholder="Average Package"
-            />
-          </div>
-        </section>
-
-        {/* ----------- 6. RESEARCH & INNOVATION ----------- */}
-        <section className="bg-white shadow rounded-xl p-6 mb-10">
-          <h2 className="text-xl font-semibold mb-4 text-[#5A189A]">
-            Research & Innovation
-          </h2>
-
-          <div className="grid grid-cols-3 gap-6">
-            <input
-              className="border p-3 rounded"
-              placeholder="Research Papers Published"
-            />
-            <input className="border p-3 rounded" placeholder="Patents Filed" />
-            <input
-              className="border p-3 rounded"
-              placeholder="Patents Granted"
-            />
-          </div>
-
-          {/* AI suggestion */}
-          <div className="flex items-center gap-3 mt-4 text-yellow-600">
-            <AlertTriangle />
-            <p>Your research data looks incomplete. Please verify entries.</p>
-          </div>
-        </section>
-
-        {/* ----------- SAVE BUTTON ----------- */}
-        <button className="bg-blue-700 text-white w-full py-3 rounded-lg font-bold flex justify-center gap-2 hover:bg-blue-800">
-          <Save /> Save Parameters
-        </button>
-      </div>
-    </div>
+      {/* ==== SAVE BUTTON ==== */}
+      <button className="bg-blue-700 text-white w-full py-3 rounded-lg font-bold flex justify-center gap-2 hover:bg-blue-800">
+        <Save /> Save Parameters
+      </button>
+    </Layout>
   );
 };
 
