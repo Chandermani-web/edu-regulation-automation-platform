@@ -20,67 +20,142 @@ const InstitutionDashboard = () => {
         </h1>
 
         {/* ===================== PROFILE CARD ===================== */}
-        <section className="bg-white border border-gray-200 shadow-sm rounded-2xl p-8 mb-10 animate-slideUp">
-          <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-2 mb-6">
-            <FileCheck /> Institution Profile
+        <section className="bg-white border border-gray-200 shadow-md rounded-2xl p-10 mb-12 animate-slideUp">
+          <h2 className="text-2xl font-semibold text-slate-800 flex items-center gap-2 mb-8">
+            <FileCheck className="text-purple-700" />
+            Institution Profile
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-gray-700">
-            <p><b>Name:</b> Example Institute of Technology</p>
-            <p><b>Code:</b> INST2301</p>
-            <p><b>Institution Type:</b> Private</p>
-            <p><b>City:</b> Jaipur</p>
-            <p><b>State:</b> Rajasthan</p>
-            <p><b>Pincode:</b> 302020</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-gray-700">
 
-            <p className="md:col-span-2">
-              <b>Address:</b> 123 Knowledge Road, Jaipur
-            </p>
+            {/* LEFT SIDE FIELDS */}
+            <div className="space-y-6">
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Name:</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter institution name"
+                />
+              </div>
 
-            <p><b>Email:</b> principal@eit.ac.in</p>
-            <p><b>Phone:</b> +91 9876543210</p>
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Code:</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter code"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Institution Type:</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Private / Government"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Email:</label>
+                <input
+                  type="email"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter email"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Phone:</label>
+                <input
+                  type="tel"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter phone number"
+                />
+              </div>
+            </div>
+
+            {/* RIGHT SIDE FIELDS */}
+            <div className="space-y-6">
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">State:</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter state"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">City:</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter city"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Pincode:</label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  placeholder="Enter pincode"
+                />
+              </div>
+
+              <div>
+                <label className="font-semibold text-slate-700 text-sm mb-1 block">Address:</label>
+                <textarea
+                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+                  rows="3"
+                  placeholder="Enter full address"
+                ></textarea>
+              </div>
+            </div>
           </div>
         </section>
 
         {/* ===================== STATS CARDS ===================== */}
-        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-10">
-          <div className="card hover:scale-105 transition-transform animate-slideUp delay-100">
-            <h3>Total Applications</h3>
-            <p className="count">05</p>
+        <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
+          <div className="card hover:scale-105 transition-transform shadow-md rounded-xl p-5 bg-white">
+            <h3 className="text-gray-600">Total Applications</h3>
+            <p className="count text-3xl font-bold text-slate-800">05</p>
           </div>
 
-          <div className="card hover:scale-105 transition-transform animate-slideUp delay-200">
-            <h3 className="flex items-center gap-2">
+          <div className="card hover:scale-105 transition-transform shadow-md rounded-xl p-5 bg-white">
+            <h3 className="flex items-center gap-2 text-gray-600">
               <CheckCircle className="text-green-600" /> Approved
             </h3>
-            <p className="count text-green-700">02</p>
+            <p className="count text-3xl font-bold text-green-700">02</p>
           </div>
 
-          <div className="card hover:scale-105 transition-transform animate-slideUp delay-300">
-            <h3 className="flex items-center gap-2">
+          <div className="card hover:scale-105 transition-transform shadow-md rounded-xl p-5 bg-white">
+            <h3 className="flex items-center gap-2 text-gray-600">
               <Clock className="text-yellow-500" /> Pending
             </h3>
-            <p className="count text-yellow-600">03</p>
+            <p className="count text-3xl font-bold text-yellow-600">03</p>
           </div>
 
-          <div className="card hover:scale-105 transition-transform animate-slideUp delay-400">
-            <h3 className="flex items-center gap-2">
+          <div className="card hover:scale-105 transition-transform shadow-md rounded-xl p-5 bg-white">
+            <h3 className="flex items-center gap-2 text-gray-600">
               <XCircle className="text-red-500" /> Rejected
             </h3>
-            <p className="count text-red-600">01</p>
+            <p className="count text-3xl font-bold text-red-600">01</p>
           </div>
 
-          <div className="card hover:scale-105 transition-transform animate-slideUp delay-500">
-            <h3 className="flex items-center gap-2">
+          <div className="card hover:scale-105 transition-transform shadow-md rounded-xl p-5 bg-white">
+            <h3 className="flex items-center gap-2 text-gray-600">
               <MessagesSquare className="text-blue-500" /> Queries
             </h3>
-            <p className="count text-blue-600">01</p>
+            <p className="count text-3xl font-bold text-blue-600">01</p>
           </div>
         </section>
 
         {/* ===================== DOCUMENT STATUS ===================== */}
-        <section className="bg-white border shadow-sm rounded-2xl p-8 mb-10 animate-slideUp">
-          <h2 className="text-xl font-semibold flex items-center gap-2 mb-3">
+        <section className="bg-white border shadow-md rounded-2xl p-10 mb-12 animate-slideUp">
+          <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
             <FileCheck className="text-purple-700" /> Document Upload Status
           </h2>
 
@@ -93,15 +168,15 @@ const InstitutionDashboard = () => {
             <div
               className="bg-green-600 h-3 rounded-full animate-progress"
               style={{ width: "83%" }}
-            />
+            ></div>
           </div>
         </section>
 
         {/* ===================== AI SCORE ===================== */}
         <div className="flex justify-end animate-slideUp">
           <div className="bg-gradient-to-br from-purple-700 via-indigo-700 to-blue-700 
-            text-white shadow-xl rounded-2xl p-6 w-56 text-center animate-pulseSlow">
-            <h3 className="flex items-center justify-center gap-2">
+            text-white shadow-xl rounded-2xl p-6 w-56 text-center">
+            <h3 className="flex items-center justify-center gap-2 text-lg">
               <Bot className="text-yellow-300" /> AI Score
             </h3>
             <p className="text-5xl font-bold mt-3">86%</p>

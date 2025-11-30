@@ -158,25 +158,25 @@ const InstitutionProfile = () => {
           Courses Offered
         </h2>
 
-        <div>
-          <label className="block font-semibold text-gray-700">Select Courses *</label>
-          <select
-            className="w-full border p-3 rounded-lg mt-1 focus:ring-2 focus:ring-[#5A189A]"
-            multiple
-          >
-            <option>B.Tech</option>
-            <option>M.Tech</option>
-            <option>BCA</option>
-            <option>MBA</option>
-            <option>BBA</option>
-            <option>Pharmacy</option>
-            <option>Polytechnic</option>
-          </select>
+       <div className="relative mt-1">
+  <select
+    multiple
+    size={1}   // makes it look like dropdown until opened
+    className="w-full border p-3 rounded-lg bg-white pr-10 focus:ring-2 focus:ring-[#5A189A]"
+  >
+    <option>B.Tech</option>
+    <option>M.Tech</option>
+    <option>BCA</option>
+    <option>MBA</option>
+    <option>BBA</option>
+    <option>Pharmacy</option>
+    <option>Polytechnic</option>
+  </select>
 
-          <p className="text-sm text-gray-500 mt-1">
-            *Hold CTRL to select multiple courses
-          </p>
-        </div>
+  <span className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600">
+    ▼
+  </span>
+</div>
 
         {/* ---------------- SAVE BUTTON ---------------- */}
         <div className="pt-5">

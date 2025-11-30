@@ -271,7 +271,7 @@ export default function DocumentUpload() {
             </div>
           </div>
 
-          <div className="w-full md:w-56 flex-shrink-0">
+          <div className="w-full md:w-56 shrink-0">
             <button
               onClick={() => alert("In a real app this would upload all docs & signatures to backend.")}
               className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg font-semibold"
