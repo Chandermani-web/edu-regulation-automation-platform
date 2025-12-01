@@ -1,145 +1,186 @@
-import Institution from "../models/institution.model.js";
-import Parameter from "../models/institution_parameter.model.js";
-import Document from "../models/document.model.js";
-import Application from "../models/application.model.js";
-import { asyncHandler } from "../services/asyncHandler.js";
+import Institution from '../models/institution.model.js';
+import Parameter from '../models/institution_parameter.model.js';
+import Document from '../models/document.model.js';
+import Application from '../models/application.model.js';
+import AIAnalysis from '../models/ai_analysis.model.js';
+import AIReport from '../models/ai_report.model.js';
+import { asyncHandler } from '../services/asyncHandler.js';
 
-export const checkAndCreateApplication = asyncHandler(async (institutionId, userId) => {
+export const checkAndCreateApplication = async (institutionId, userId) => {
+    try {
+        console.log('Checking application for:', institutionId, userId);
 
-  // 1. Check if institution exists
-  const institution = await Institution.findById(institutionId);
-  if (!institution) return { ok: false, reason: "Institution not found" };
+        // 1. Check if institution exists
+        const institution = await Institution.findById(institutionId);
+        if (!institution) return { ok: false, reason: 'Institution not found' };
 
-  // 2. Check if 23 parameters exist
-  const parameterCount = await Parameter.countDocuments({ institution_id: institutionId });
-  if (parameterCount < 23) {
-    return { ok: false, reason: "All 23 AICTE parameters not submitted" };
-  }
+        // 2. Check if 22 parameters exist
+        const parameterCount = await Parameter.countDocuments({
+            institution_id: institutionId,
+        });
 
-  // 3. Check if required documents uploaded (you decide count)
-  const docs = await Document.countDocuments({ institution: institutionId });
-  if (docs < 1) { 
-    return { ok: false, reason: "Required documents not uploaded" };
-  }
+        console.log('Parameter count:', parameterCount);
 
-  // 4. Check if an application already exists (avoid duplicates)
-  const existing = await Application.findOne({
-    institution: institutionId,
-    status: { $in: ["submitted", "under_review", "approved"] }
-  });
+        if (parameterCount < 22) {
+            return {
+                ok: false,
+                reason: 'All 22 AICTE parameters not submitted',
+            };
+        }
 
-  if (existing) {
-    return { ok: false, reason: "Application already exists" };
-  }
+        // 3. Check documents
+        const docs = await Document.countDocuments({
+            institution_id: institutionId,
+        });
 
-  // 5. All good → create application
-  const app = await Application.create({
-    institution_id: institutionId,
-    status: "submitted",
-    approved_by: institution.type,
-    submitted_at: new Date(),
-    submitted_by: userId
-  });
+        console.log('Document count:', docs);
 
-  return { ok: true, application: app };
-});
+        if (docs < 1) {
+            return { ok: false, reason: 'Required documents not uploaded' };
+        }
+
+        // 4. Check if application already exists
+        const existing = await Application.findOne({
+            institution_id: institutionId,
+            status: { $in: ['submitted', 'under_review', 'approved'] },
+        });
+
+        if (existing) {
+            console.log('Application already exists for institution:', institutionId);
+            return { ok: false, reason: 'Application already exists' };
+        }
+
+        // 5. Create application
+        const app = await Application.create({
+            institution_id: institutionId,
+            status: 'submitted',
+            approved_by: institution.type,
+            submitted_at: new Date(),
+            submitted_by: userId,
+        });
+
+        return { ok: true, application: app };
+    } catch (err) {
+        console.error('Error inside checkAndCreateApplication:', err);
+        return { ok: false, reason: 'Internal server error' };
+    }
+};
 
 export const createApplicationManually = asyncHandler(async (req, res) => {
-  const { institution_id } = req.body;
+    const { institution_id } = req.body;
+    console.log(institution_id, req.user.id);
 
-  if (!institution_id)
-    return res.status(400).json({
-      success: false,
-      message: "Institution ID is required",
+    if (!institution_id)
+        return res.status(400).json({
+            success: false,
+            message: 'Institution ID is required',
+        });
+
+    const result = await checkAndCreateApplication(institution_id, req.user.id);
+
+    if (!result || !result.ok) {
+        return res.status(400).json({
+            success: false,
+            message: result?.reason || 'Application creation failed',
+        });
+    }
+
+    await Institution.findByIdAndUpdate(institution_id, {
+        $push: { applications: result.application._id },
     });
 
-  const result = await checkAndCreateApplication(institution_id, req.user._id);
-
-  if (!result.ok) {
-    return res.status(400).json({
-      success: false,
-      message: result.reason,
+    return res.status(201).json({
+        success: true,
+        message: 'Application created successfully',
+        application: result.application,
     });
-  }
-
-  return res.status(201).json({
-    success: true,
-    message: "Application created successfully",
-    application: result.application,
-  });
 });
 
 export const getApplication = asyncHandler(async (req, res) => {
-  const { institution_id } = req.body;
+    const { institution_id } = req.query;
 
-  if (!institution_id) {
-    return res.status(400).json({
-      success: false,
-      message: "Institution ID is required",
+    if (!institution_id) {
+        return res.status(400).json({
+            success: false,
+            message: 'Institution ID is required',
+        });
+    }
+
+    const app = await Application.findOne({ institution_id })
+        .populate('submitted_by', 'name email role')
+        .populate(
+            'institution_id',
+            'name type state district full_address website established_year institution_code NAAC_grade NIRF_rank AISHE_code UDISE_code website'
+        )
+        .populate(
+            'ai_analysis',
+            'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
+        )
+        .populate('ai_report', 'report_title report_url created_at');
+
+    if (!app) {
+        return res.status(404).json({
+            success: false,
+            message: 'No application found for this institution',
+        });
+    }
+
+    return res.json({
+        success: true,
+        application: app,
     });
-  }
-
-  const app = await Application.findOne({ institution_id })
-    .populate("submitted_by", "name email role")
-    .populate("institution_id", "name type state district website established_year total_students total_faculty");
-
-  if (!app) {
-    return res.status(404).json({
-      success: false,
-      message: "No application found for this institution",
-    });
-  }
-
-  return res.json({
-    success: true,
-    application: app,
-  });
 });
-
-
 
 // to get all the application for ugc , aicte and super_admin
 export const getAllApplications = asyncHandler(async (req, res) => {
-  const userRole = req.user.role;
+    const userRole = req.user.role;
 
-  let filter = {};
+    let filter = {};
 
-  // -------------------------
-  //  SUPER ADMIN → sees all
-  // -------------------------
-  if (userRole === "super_admin") {
-    filter = {}; // No filter → return ALL applications
-  }
+    // -------------------------
+    //  SUPER ADMIN → sees all
+    // -------------------------
+    if (userRole === 'super_admin') {
+        filter = {}; // No filter → return ALL applications
+    }
 
-  // -------------------------
-  //  UGC → sees only UGC institutions
-  // -------------------------
-  if (userRole === "ugc") {
-    filter = { approved_by: "ugc" }; 
-    // OR if you mark institution under UGC:
-    // filter = { "institution_type": "ugc" }
-  }
+    // -------------------------
+    //  UGC → sees only UGC institutions
+    // -------------------------
+    if (userRole === 'ugc') {
+        filter = { approved_by: 'ugc' };
+        // OR if you mark institution under UGC:
+        // filter = { "institution_type": "ugc" }
+    }
 
-  // -------------------------
-  //  AICTE → sees only AICTE institutions
-  // -------------------------
-  if (userRole === "aicte") {
-    filter = { approved_by: "aicte" };
-    // OR if institutions mapped:
-    // filter = { "institution_type": "aicte" }
-  }
+    // -------------------------
+    //  AICTE → sees only AICTE institutions
+    // -------------------------
+    if (userRole === 'aicte') {
+        filter = { approved_by: 'aicte' };
+        // OR if institutions mapped:
+        // filter = { "institution_type": "aicte" }
+    }
 
-  // -------------------------
-  // Fetch Applications
-  // -------------------------
-  const apps = await Application.find(filter)
-    .populate("institution_id", "name type state district website established_year total_students total_faculty")
-    .populate("submitted_by", "name email role")
-    .sort({ submitted_at: -1 }); // newest first
+    // -------------------------
+    // Fetch Applications
+    // -------------------------
+    const apps = await Application.find(filter)
+        .populate(
+            'institution_id',
+            'name type state district full_address website established_year institution_code NAAC_grade NIRF_rank AISHE_code UDISE_code website'
+        )
+        .populate('submitted_by', 'name email role')
+        .populate(
+            'ai_analysis',
+            'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
+        )
+        .populate('ai_report', '')
+        .sort({ submitted_at: -1 }); // newest first
 
-  return res.json({
-    success: true,
-    count: apps.length,
-    applications: apps,
-  });
+    return res.json({
+        success: true,
+        count: apps.length,
+        applications: apps,
+    });
 });

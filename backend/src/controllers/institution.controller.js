@@ -7,14 +7,20 @@ export const createInstitute = asyncHandler(async (req, res) => {
     const {
         name,
         type,
+        email,
+        established_year,
+        institution_code,
         state,
         district,
         address,
-        established_year,
-        total_students,
-        total_faculty,
+        pincode,
+        full_address,
         website,
-        accreditation_status,
+        courses,
+        NAAC_grade,
+        NIRF_rank,
+        AISHE_code,
+        UDISE_code,
     } = req.body;
 
     const existingInstitute = await Institution.findOne({
@@ -36,14 +42,20 @@ export const createInstitute = asyncHandler(async (req, res) => {
         user_id: req.user.id,
         name,
         type,
+        email,
+        established_year,
+        institution_code,
         state,
         district,
         address,
-        established_year,
-        total_students,
-        total_faculty,
+        pincode,
+        courses,
+        full_address,
         website,
-        accreditation_status,
+        NAAC_grade,
+        NIRF_rank,
+        AISHE_code,
+        UDISE_code,
     });
 
     return res.status(201).json({
@@ -54,13 +66,17 @@ export const createInstitute = asyncHandler(async (req, res) => {
 });
 
 export const getInstituteByUser = asyncHandler(async (req, res) => {
-    const data = await Institution.findOne({ user_id: req.user.id }).populate(
+    const data = await Institution.find({ user_id: req.user.id }).populate(
         'parameters',
         '_id parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
     )
     .populate(
             'documents',
             'title file_url public_id category, uploaded_by upliaded_at'
+    )
+    .populate(
+            'applications',
+            'status submitted_by submitted_at updatedAt approved_by'
     );
     return res.status(201).json({ success: true, data });
 });
@@ -68,14 +84,21 @@ export const getInstituteByUser = asyncHandler(async (req, res) => {
 export const updateInstitute = asyncHandler(async (req, res) => {
     const {
         name,
+        type,
+        email,
+        established_year,
+        institution_code,
         state,
         district,
         address,
-        established_year,
-        total_students,
-        total_faculty,
+        pincode,
+        full_address,
+        courses,
         website,
-        accreditation_status,
+        NAAC_grade,
+        NIRF_rank,
+        AISHE_code,
+        UDISE_code,
     } = req.body;
 
     const existingInstitution = await Institution.findOne({
@@ -91,13 +114,19 @@ export const updateInstitute = asyncHandler(async (req, res) => {
     if (address !== undefined) existingInstitution.address = address;
     if (established_year !== undefined)
         existingInstitution.established_year = established_year;
-    if (total_students !== undefined)
-        existingInstitution.total_students = total_students;
-    if (total_faculty !== undefined)
-        existingInstitution.total_faculty = total_faculty;
+    if (institution_code !== undefined)
+        existingInstitution.institution_code = institution_code;
+    if (pincode !== undefined) existingInstitution.pincode = pincode;
+    if (full_address !== undefined)
+        existingInstitution.full_address = full_address;
+    if (type !== undefined) existingInstitution.type = type;
+    if (email !== undefined) existingInstitution.email = email;
     if (website !== undefined) existingInstitution.website = website;
-    if (accreditation_status !== undefined)
-        existingInstitution.accreditation_status = accreditation_status;
+    if (NAAC_grade !== undefined) existingInstitution.NAAC_grade = NAAC_grade;
+    if (NIRF_rank !== undefined) existingInstitution.NIRF_rank = NIRF_rank;
+    if (AISHE_code !== undefined) existingInstitution.AISHE_code = AISHE_code;
+    if (UDISE_code !== undefined) existingInstitution.UDISE_code = UDISE_code;
+    if (courses !== undefined) existingInstitution.courses = courses;
 
     await existingInstitution.save();
     return res.status(200).json({
@@ -114,6 +143,10 @@ export const getAllInstitute = asyncHandler(async (req, res) => {
         .populate(
             'documents',
             'title file_url public_id category, uploaded_by upliaded_at'
+        )
+        .populate(
+            'applications',
+            'status submitted_by submitted_at updatedAt approved_by'
         );
 
     if (!institutes)

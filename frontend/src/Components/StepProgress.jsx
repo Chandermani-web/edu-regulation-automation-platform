@@ -1,57 +1,90 @@
+// StepProgress.jsx - Updated with government styling
 import React from "react";
+import { Check } from "lucide-react";
 
 const StepProgress = ({ currentStep }) => {
   const steps = [
-    { id: 1, title: "Institution Profile", description: "Add institution basic details" },
-    { id: 2, title: "Parameters Entry", description: "Fill academic & infra parameters" },
-    { id: 3, title: "Document Upload", description: "Upload mandatory documents" },
-    { id: 4, title: "Application Submission", description: "Review & submit application" },
-    { id: 5, title: "Queries", description: "Respond to UGC/AICTE queries" },
-    { id: 6, title: "Reviews", description: "View review feedback" },
-    { id: 7, title: "AI Analytics", description: "Track AI insights" },
-    { id: 8, title: "AI Reports", description: "Download generated reports" },
+    {
+      id: 1,
+      title: "Institution Profile",
+      description: "Add institution basic details",
+    },
+    {
+      id: 2,
+      title: "Parameters Entry",
+      description: "Fill academic & infra parameters",
+    },
+    {
+      id: 3,
+      title: "Document Upload",
+      description: "Upload mandatory documents",
+    },
+    {
+      id: 4,
+      title: "Application Submission",
+      description: "Review & submit application",
+    },
   ];
 
   return (
-    <div className="flex items-center justify-between w-full py-8 bg-white rounded-xl shadow border px-6 overflow-x-auto">
+    <div className="w-80 bg-white rounded-xl shadow-sm border border-gray-200 p-6 sticky top-6">
+      <h3 className="font-semibold text-gray-900 mb-6 text-lg">Application Progress</h3>
+      
+      <div className="space-y-6">
+        {steps.map((step, index) => {
+          const isActive = currentStep === step.id;
+          const isCompleted = step.id < currentStep;
+          const isLast = index === steps.length - 1;
 
-      {steps.map((step, index) => {
-        const isActive = currentStep === step.id;
-        const isCompleted = step.id < currentStep;
+          return (
+            <div key={step.id} className="flex gap-4">
+              {/* Step connector line */}
+              {!isLast && (
+                <div className="absolute left-7 mt-10 w-0.5 h-8 bg-gray-200">
+                  {isCompleted && (
+                    <div className="w-0.5 h-full bg-blue-600"></div>
+                  )}
+                </div>
+              )}
 
-        return (
-          <div key={step.id} className="flex items-center gap-4 min-w-[160px]">
+              {/* Step number/icon */}
+              <div className="relative z-10">
+                <div
+                  className={`w-10 h-10 flex items-center justify-center rounded-full border-2 transition-colors ${
+                    isActive
+                      ? "bg-blue-600 border-blue-600 text-white"
+                      : isCompleted
+                      ? "bg-green-500 border-green-500 text-white"
+                      : "bg-white border-gray-300 text-gray-500"
+                  }`}
+                >
+                  {isCompleted ? (
+                    <Check size={18} />
+                  ) : (
+                    <span className="font-medium">{step.id}</span>
+                  )}
+                </div>
+              </div>
 
-            {/* Number Circle */}
-            <div
-              className={`h-10 w-10 flex items-center justify-center rounded-full border-2 
-              ${isActive ? "bg-green-600 text-white border-green-600"
-                : isCompleted ? "bg-green-200 text-green-800 border-green-600"
-                : "bg-gray-100 text-gray-500 border-gray-300"}`}
-            >
-              {step.id}
+              {/* Step content */}
+              <div className="flex-1 pb-6">
+                <p
+                  className={`font-medium ${
+                    isActive || isCompleted
+                      ? "text-gray-900"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {step.title}
+                </p>
+                <p className="text-sm text-gray-500 mt-1">
+                  {step.description}
+                </p>
+              </div>
             </div>
-
-            {/* Text */}
-            <div>
-              <p className={`font-semibold ${
-                isActive ? "text-green-700" :
-                isCompleted ? "text-gray-800" :
-                "text-gray-500"
-              }`}>
-                {step.title}
-              </p>
-              <p className="text-sm text-gray-400">{step.description}</p>
-            </div>
-
-            {/* Line Separator (skip last) */}
-            {index !== steps.length - 1 && (
-              <div className="flex-1 h-[2px] bg-gray-300 mx-4"></div>
-            )}
-          </div>
-        );
-      })}
-
+          );
+        })}
+      </div>
     </div>
   );
 };

@@ -4,7 +4,8 @@ import { Home } from 'lucide-react';
 import Login from './Pages/Login';
 import AppContext from './Context/UseContext';
 // import Dashboard from './Pages/Dashboard';
-import InstitutionDashboard from './Pages/Institution/InstitutionDashboard';
+import InstitutionDashboard from './Pages/Institution/Home/InstitutionDashboard';
+import InstitutionApplicationPage from './Pages/Institution/Application/Application';
 import InstitutionProfile from './Pages/Institution/InstitutionProfile';
 import ParametersEntry from './Pages/Institution/ParametersEntry';
 import DocumentUpload from './Pages/Institution/DocumentUpload';
@@ -14,24 +15,42 @@ import Reviews from './Pages/Institution/Reviews';
 import AIAnalytics from './Pages/Institution/AIAnalytics';
 import AIReports from './Pages/Institution/AIReports';
 import Loading from './Utils/Loading';
+import Dashboard from './Pages/Dashboard';
+import InstitutionNavbar from './Common/Navbar/InstitutionNavbar';
+import AIAnalyticsAndReports from './Pages/Institution/Report/ApplicationReport';
+import LandingPage from './Pages/LandingPage';
 
 const App = () => {
-  const { auth } = useContext(AppContext);
+  const { auth, role } = useContext(AppContext);
   console.log(auth)
   return (
-    <div>
+    <div className="min-h-screen bg-gray-100">
+      <header>
+        {
+          role === "institution" && (
+            <InstitutionNavbar />
+          )
+        }
+      </header>
       <Suspense fallback={<Loading />}>
         <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/dashboard" element={<InstitutionDashboard/>} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/login" element={<Login />} />
+          <Route path='/dashboard' element={auth ? <Dashboard /> : <LandingPage />} />
+          
+          {/* institution routes */}
+          <Route path="/institution/dashboard" element={<InstitutionDashboard/>} />
+          <Route path="/institution/application" element={<InstitutionApplicationPage />} />
+          
           <Route path="/institution/profile" element={<InstitutionProfile />} />
-          <Route path="/parameters" element={<ParametersEntry />} />
-          <Route path="/documents" element={<DocumentUpload />} />
-          <Route path="/applications" element={<ApplicationSubmission />} />
-          <Route path="/queries" element={<Queries/>} />
-          <Route path="/reviews" element={<Reviews/>} />
-          <Route path="/ai-analytics" element={<AIAnalytics />} />
-          <Route path="/ai-reports" element={<AIReports />} />
+          <Route path="/institution/parameters/:id" element={<ParametersEntry />} />
+          <Route path="/institution/documents/:id" element={<DocumentUpload />} />
+          <Route path="/institution/application-submission/:id" element={<ApplicationSubmission />} />
+          <Route path="/institution/queries" element={<Queries/>} />
+          <Route path="/institution/reviews" element={<Reviews/>} />
+          <Route path="/institution/ai-analysis/:id" element={<AIAnalytics />} />
+          <Route path="/institution/ai-reports/:id" element={<AIReports />} />
+          <Route path='/institution/ai-analysis' element={<AIAnalyticsAndReports />} />
         </Routes>
       </Suspense>
     </div>

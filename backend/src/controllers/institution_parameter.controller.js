@@ -5,6 +5,7 @@ import Institution from '../models/institution.model.js';
 
 // create parameter
 export const createParameters = asyncHandler(async (req, res) => {
+    console.log(req.body);
     const { institution_id, parameters } = req.body;
 
     if (!parameters || !Array.isArray(parameters)) {

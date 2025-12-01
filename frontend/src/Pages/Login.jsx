@@ -27,13 +27,13 @@ const Login = () => {
     try{
       const response = await axios.post('http://localhost:3000/api/auth/login', formData, { withCredentials: true });
       console.log('Server response:', response.data);
-      if(response.status === 200){
+      if(response.status === 200 || response.ok){
         localStorage.setItem("edu-relational-automation-platform", "true");
         localStorage.setItem('userRole', response.data.role);
         toast.success(`🎊 Welcome back! ${response.data.message}`, {
           position: 'bottom-right',
           autoClose: 1500,
-          onClose: () => { window.location.href = '/'; }
+          onClose: () => { navigate('/dashboard'); }
         })
       }
       else{
@@ -178,10 +178,7 @@ const Login = () => {
               <button
                 type="button"
                 className="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center space-x-2"
-                onClick={() => {
-                   localStorage.setItem("userRole", "institution");
-                   navigate("/dashboard");
-                   }}
+                onClick={(e) => handleSubmit(e) }
               >
                 <LogIn className="h-5 w-5" />
                 <span>Login to Dashboard</span>

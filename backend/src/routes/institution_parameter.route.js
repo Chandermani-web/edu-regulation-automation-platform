@@ -4,9 +4,9 @@ import { createParameters, updateMultipleParameters } from '../controllers/insti
 
 const router = express.Router();
 
-router.post("/create",auth, createParameters);
+router.post("/create", createParameters);
 
 // router.put("/update", auth, updateSingleParameter);
-router.put("/update", auth, updateMultipleParameters);
-
+router.put("/update/:id",  updateMultipleParameters);
+    
 export default router;

@@ -15,6 +15,8 @@ const applicationSchema = new mongoose.Schema({
         enum: ['ugc', 'aicte'],
         required: true,
     },
+    ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }],
+    ai_report: { type: mongoose.Schema.Types.Mixed, ref: 'AIReport' },
     submitted_at: { type: Date, default: Date.now },
 });
 

@@ -35,9 +35,9 @@ app.use(cookieParser());
 // routes
 app.use("/api/auth", AuthRoutes);
 app.use("/api/institution",InstitutionRoutes);
-app.use("/api/institutionparameter",InstitutionParameterRoutes);
-app.use('/api/documents',DocumentRoutes);
-app.use("/api/application",ApplicationRoutes);
+app.use("/api/institution/parameter",InstitutionParameterRoutes);
+app.use('/api/institution/documents',DocumentRoutes);
+app.use("/api/institution/application",ApplicationRoutes);
 
 app.use("/api/ai-analysis", AIAnalysisRoutes);
 app.use("/api/ai-report", AIReportRoutes);

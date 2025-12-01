@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import Layout from "../../Components/Layout";
-import StepProgress from "../../Components/StepProgress";
+import Layout from "../../../Components/Layout";
+import StepProgress from "../../../Components/StepProgress";
 import {
   Bot,
   AlertTriangle,
@@ -507,4 +507,4 @@ const AIAnalyticsAndReports = () => {
   );
 };
 
-export default AIAnalyticsAndReports; 
+export default AIAnalyticsAndReports;

@@ -5,7 +5,7 @@ import { deleteDocument, getDocumentsByInstitution, listDocuments, updateDocumen
 
 const router = express.Router();
 
-router.post("/upload", auth, uploadSingle, uploadDocument);
+router.post("/upload", auth, uploadSingle.single('file'), uploadDocument);
 router.put("/update", auth, updateDocument)
 router.delete("/delete", auth, deleteDocument);
 

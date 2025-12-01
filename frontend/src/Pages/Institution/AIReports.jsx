@@ -1,5 +1,4 @@
 import React from "react";
-import Layout from "../../Components/Layout";
 import StepProgress from "../../Components/StepProgress";
 import {
   FileText,
@@ -13,8 +12,8 @@ import {
 
 const AIReports = () => {
   return (
-    <Layout showNavbar={false}>
-      <StepProgress currentStep={8} />
+    <div className="min-h-screen bg-gray-100 p-6 flex justify-center items-start gap-10">
+      <StepProgress currentStep={6} />
 
       <div className="w-full p-10 space-y-10">
         {/* PAGE TITLE */}
@@ -125,7 +124,7 @@ const AIReports = () => {
           </table>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

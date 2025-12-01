@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import Layout from "../../Components/Layout"; // ✅ Use Layout instead of manual sidebar
 import StepProgress from "../../Components/StepProgress";
 import {
   MessageSquareWarning,
@@ -74,10 +73,8 @@ const Queries = () => {
   };
 
   return (
-    <Layout showNavbar={false}>
-      <StepProgress currentStep={5} />
+    <div>
 
-     
       <p className="text-gray-600 mb-6">
         View, reply, and track all queries raised by UGC/AICTE.
       </p>
@@ -189,7 +186,7 @@ const Queries = () => {
           )}
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 
