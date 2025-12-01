@@ -1,12 +1,19 @@
 import React from 'react'
 import InstitutionDashboard from './Institution/Home/InstitutionDashboard.jsx';
-import InstitutionNavbar from '../Common/Navbar/InstitutionNavbar.jsx';
+import InstitutionNavbar from '../Components/InstitutionNavbar.jsx';
 
 const Dashboard = () => {
   const role = localStorage.getItem("userRole") || "institution";
 
   return (
     <div className="">
+      <header>
+        {
+          role === "institution" && (
+            <InstitutionNavbar />
+          )
+        }
+      </header>
 
         {/* main content */}
       {role === "institution" && (

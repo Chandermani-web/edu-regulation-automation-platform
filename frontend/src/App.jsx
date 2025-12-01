@@ -3,7 +3,6 @@ import { Route, Routes } from 'react-router-dom';
 import { Home } from 'lucide-react';
 import Login from './Pages/Login';
 import AppContext from './Context/UseContext';
-// import Dashboard from './Pages/Dashboard';
 import InstitutionDashboard from './Pages/Institution/Home/InstitutionDashboard';
 import InstitutionApplicationPage from './Pages/Institution/Application/Application';
 import InstitutionProfile from './Pages/Institution/InstitutionProfile';
@@ -16,22 +15,15 @@ import AIAnalytics from './Pages/Institution/AIAnalytics';
 import AIReports from './Pages/Institution/AIReports';
 import Loading from './Utils/Loading';
 import Dashboard from './Pages/Dashboard';
-import InstitutionNavbar from './Common/Navbar/InstitutionNavbar';
+import InstitutionNavbar from './Components/InstitutionNavbar';
 import AIAnalyticsAndReports from './Pages/Institution/Report/ApplicationReport';
 import LandingPage from './Pages/LandingPage';
 
 const App = () => {
-  const { auth, role } = useContext(AppContext);
+  const { auth } = useContext(AppContext);
   console.log(auth)
   return (
     <div className="min-h-screen bg-gray-100">
-      <header>
-        {
-          role === "institution" && (
-            <InstitutionNavbar />
-          )
-        }
-      </header>
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<LandingPage />} />

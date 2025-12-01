@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { Lock, Shield, Brain, Eye, EyeOff, LogIn } from "lucide-react";
 import axios from "axios";
 import { toast, ToastContainer } from 'react-toastify'
 import { useNavigate } from "react-router-dom";
+import AppContext from "../Context/UseContext";
 
 
 
 const Login = () => {
+  const { setAuth } = useContext(AppContext);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,6 +30,7 @@ const Login = () => {
       const response = await axios.post('http://localhost:3000/api/auth/login', formData, { withCredentials: true });
       console.log('Server response:', response.data);
       if(response.status === 200 || response.ok){
+        setAuth(true);
         localStorage.setItem("edu-relational-automation-platform", "true");
         localStorage.setItem('userRole', response.data.role);
         toast.success(`🎊 Welcome back! ${response.data.message}`, {
