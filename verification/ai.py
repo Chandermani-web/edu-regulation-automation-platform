@@ -178,7 +178,6 @@ def build_final_json(text_data, visual_data, scores, red_flags):
     REQUIRED = ["Classroom", "Library", "Laboratory", "College Building"]
     visual_map = {v["type"]: v["confidence"] for v in visual_data}
 
-    # Ensure all categories exist
     final_visual = {}
     for cat in REQUIRED:
         final_visual[cat] = visual_map.get(cat, "missing")
@@ -188,6 +187,9 @@ def build_final_json(text_data, visual_data, scores, red_flags):
         faculty_ratio = round(text_data["students"] / text_data["faculty"], 2)
     else:
         faculty_ratio = "missing"
+
+    # 🚨 STRICT DECISION LOGIC ADDED HERE
+    final_status = "Rejected" if red_flags else "Approved"
 
     output_json = {
         "institution_details": {
@@ -213,8 +215,9 @@ def build_final_json(text_data, visual_data, scores, red_flags):
             "total_score": scores["total"]
         },
 
+        # 🚨 STRICT APPROVAL RULE HERE
         "final_decision": {
-            "status": "Approved" if scores["total"] >= 75 else "Rejected",
+            "status": final_status,
             "reasons": red_flags if red_flags else ["No issues found"]
         }
     }
@@ -297,7 +300,7 @@ def calculate_and_verify(text_data, visual_data):
 #   MAIN EXECUTION
 # ==========================================================
 if __name__ == "__main__":
-    target_path = r"C:\\Users\\Amit\\Downloads\\AMIT WORK DSU (3)\\SIH ODISSA\\worldumiversity.pdf"
+    target_path = r"C:\\Users\\Amit\\Downloads\\AMIT WORK DSU (3)\\SIH ODISSA\\Sample2.pdf"
 
     print(f"\n🔍 Processing File: {target_path}\n")
 
