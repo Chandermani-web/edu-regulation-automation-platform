@@ -8,7 +8,7 @@ import AppContext from "../Context/UseContext";
 
 
 const Login = () => {
-  const { setAuth } = useContext(AppContext);
+  const { setAuth, setRole, fetchInstitutionById, fetchApplicationById, fetchAllInstitutions, fetchAllApplications } = useContext(AppContext);
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -33,6 +33,11 @@ const Login = () => {
         setAuth(true);
         localStorage.setItem("edu-relational-automation-platform", "true");
         localStorage.setItem('userRole', response.data.role);
+        fetchInstitutionById();
+        fetchApplicationById();
+        fetchAllInstitutions();
+        fetchAllApplications();
+        setRole(response.data.role);
         toast.success(`🎊 Welcome back! ${response.data.message}`, {
           position: 'bottom-right',
           autoClose: 1500,

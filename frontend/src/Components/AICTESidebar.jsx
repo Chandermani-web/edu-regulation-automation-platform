@@ -11,7 +11,7 @@ import {
   ChevronRight
 } from "lucide-react";
 
-const Sidebar = () => {
+const AICTESidebar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -19,32 +19,32 @@ const Sidebar = () => {
     { 
       name: "Dashboard", 
       icon: <LayoutDashboard size={20} />, 
-      path: "/ugc/dashboard" 
+      path: "/aicte/dashboard" 
     },
     { 
       name: "Latest Applications", 
       icon: <FileSpreadsheet size={20} />, 
-      path: "/ugc/latest-application" 
+      path: "/aicte/latest-application" 
     },
     { 
-      name: "Approved Colleges", 
+      name: "Approved Universities", 
       icon: <Building2 size={20} />, 
-      path: "/ugc/college" 
+      path: "/aicte/university" 
     },
     { 
       name: "NIRF Ranking", 
       icon: <Award size={20} />, 
-      path: "/ugc/nirf-ranking" 
+      path: "/aicte/nirf-ranking" 
     },
     { 
       name: "Review & Queries", 
       icon: <MessageSquare size={20} />, 
-      path: "/ugc/review-queries" 
+      path: "/aicte/review-queries" 
     },
     { 
       name: "Final Approval", 
       icon: <Shield size={20} />, 
-      path: "/ugc/final-approval" 
+      path: "/aicte/final-approval" 
     },
   ];
 
@@ -82,7 +82,7 @@ const Sidebar = () => {
             <Building2 size={28} className="text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-gray-800">UGC</h1>
+            <h1 className="text-xl font-bold text-gray-800">AICTE</h1>
             <p className="text-sm text-gray-600 font-medium">Evaluation Portal</p>
           </div>
         </div>
@@ -151,4 +151,4 @@ const Sidebar = () => {
   );
 };
 
-export default Sidebar;
+export default AICTESidebar;

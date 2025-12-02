@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 
 const applicationSchema = new mongoose.Schema({
+    user_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     institution_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Institution',
@@ -15,8 +16,10 @@ const applicationSchema = new mongoose.Schema({
         enum: ['ugc', 'aicte'],
         required: true,
     },
+    remarks: { type: String },
+    isApproved: { type: Boolean, default: false },
     ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }],
-    ai_report: { type: mongoose.Schema.Types.Mixed, ref: 'AIReport' },
+    ai_report: { type: mongoose.Schema.Types.ObjectId, ref: 'AIReport' },
     submitted_at: { type: Date, default: Date.now },
 });
 

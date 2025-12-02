@@ -46,15 +46,19 @@ export const checkAndCreateApplication = async (institutionId, userId) => {
         });
 
         if (existing) {
-            console.log('Application already exists for institution:', institutionId);
+            console.log(
+                'Application already exists for institution:',
+                institutionId
+            );
             return { ok: false, reason: 'Application already exists' };
         }
 
         // 5. Create application
         const app = await Application.create({
+            user_id: userId,
             institution_id: institutionId,
             status: 'submitted',
-            approved_by: institution.type,
+            approved_by: institution.type, // 'ugc' or 'aicte'
             submitted_at: new Date(),
             submitted_by: userId,
         });
@@ -97,16 +101,17 @@ export const createApplicationManually = asyncHandler(async (req, res) => {
 });
 
 export const getApplication = asyncHandler(async (req, res) => {
-    const { institution_id } = req.query;
+    const user_id = req.user.id;
+    console.log(user_id);
 
-    if (!institution_id) {
+    if (!user_id) {
         return res.status(400).json({
             success: false,
-            message: 'Institution ID is required',
+            message: 'Useer ID is required',
         });
     }
 
-    const app = await Application.findOne({ institution_id })
+    const app = await Application.findOne({ user_id })
         .populate('submitted_by', 'name email role')
         .populate(
             'institution_id',
@@ -175,12 +180,54 @@ export const getAllApplications = asyncHandler(async (req, res) => {
             'ai_analysis',
             'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
         )
-        .populate('ai_report', '')
+        .populate('ai_report', 'report_title report_url created_at')
+        .populate(
+            'ai_analysis',
+            'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
+        )
         .sort({ submitted_at: -1 }); // newest first
 
     return res.json({
         success: true,
         count: apps.length,
         applications: apps,
+    });
+});
+
+// for approving or rejecting application by ugc , aicte and super_admin
+export const ApprovedOrRejectApplication = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { action, remarks } = req.body; // 'approve' or 'reject'
+
+    console.log("USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("PARAM:", req.params);
+
+    if (!['approve', 'reject'].includes(action)) {
+        return res.status(400).json({
+            success: false,
+            message: "Action must be either 'approve' or 'reject'",
+        });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+        return res.status(404).json({
+            success: false,
+            message: 'Application not found',
+        });
+    }
+
+    application.status = action === 'approve' ? 'approved' : 'rejected';
+    application.approved_by = req.user.role.toLowerCase();
+    application.isApproved = action === 'approve';
+    application.remarks = remarks;
+    await application.save();
+
+    return res.json({
+        success: true,
+        message: `Application ${action}d successfully`,
+        application,
     });
 });

@@ -1,38 +1,25 @@
-import React from 'react'
-import InstitutionDashboard from './Institution/Home/InstitutionDashboard.jsx';
-import InstitutionNavbar from '../Components/InstitutionNavbar.jsx';
+import React from "react";
+import InstitutionDashboard from "./Institution/Home/InstitutionDashboard.jsx";
+import InstitutionNavbar from "../Components/InstitutionNavbar.jsx";
+import UGCDashboard from "./UGC/UGCDashboard.jsx";
+import AICTEDashboard from "./AICTE/AICTEDashboard.jsx";
+import SuperAdminDashboard from "./Super_admin/SuperAdminDashboard.jsx";
 
 const Dashboard = () => {
   const role = localStorage.getItem("userRole") || "institution";
 
   return (
     <div className="">
-      <header>
-        {
-          role === "institution" && (
-            <InstitutionNavbar />
-          )
-        }
-      </header>
+      {/* main content */}
+      {role === "institution" && <InstitutionDashboard />}
 
-        {/* main content */}
-      {role === "institution" && (
-        <InstitutionDashboard />
-      )}
+      {role === "aicte" && <AICTEDashboard />}
 
-      {role === "ugc" && (
-        <div>📌 UGC Dashboard Features</div>
-      )}
+      {role === "ugc" && <UGCDashboard />}
 
-      {role === "aicte" && (
-        <div>📌 AICTE Dashboard Features</div>
-      )}
-
-      {role === "super_admin" && (
-        <div>🛠 Super Admin Controls</div>
-      )}
+      {role === "super_admin" && <SuperAdminDashboard />}
     </div>
   );
-}
+};
 
 export default Dashboard;

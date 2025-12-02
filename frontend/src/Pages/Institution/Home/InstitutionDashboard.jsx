@@ -81,7 +81,7 @@ const InstitutionDashboard = () => {
   };
 
   return (
-    <Layout>
+    <div>
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-7xl mx-auto">
           {/* HEADER SECTION */}
@@ -369,7 +369,7 @@ const InstitutionDashboard = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

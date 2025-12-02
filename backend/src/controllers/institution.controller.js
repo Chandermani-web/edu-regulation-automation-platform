@@ -66,18 +66,23 @@ export const createInstitute = asyncHandler(async (req, res) => {
 });
 
 export const getInstituteByUser = asyncHandler(async (req, res) => {
-    const data = await Institution.find({ user_id: req.user.id }).populate(
-        'parameters',
-        '_id parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
-    )
-    .populate(
+    const data = await Institution.find({ user_id: req.user.id })
+        .populate(
+            'parameters',
+            '_id parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
+        )
+        .populate(
             'documents',
             'title file_url public_id category, uploaded_by upliaded_at'
-    )
-    .populate(
+        )
+        .populate(
             'applications',
-            'status submitted_by submitted_at updatedAt approved_by'
-    );
+            'status submitted_by submitted_at updatedAt approved_by isApproved'
+        )
+        .populate(
+            'ai_analysis',
+            'institution_id application_id  analyzed_by input_data ai_output institution_details visual_detection scores final_decision ai_total_score final_status parameter_compliance_score status error run_count run_at'
+        );
     return res.status(201).json({ success: true, data });
 });
 
@@ -146,7 +151,11 @@ export const getAllInstitute = asyncHandler(async (req, res) => {
         )
         .populate(
             'applications',
-            'status submitted_by submitted_at updatedAt approved_by'
+            'status submitted_by submitted_at updatedAt approved_by isApproved remarks ai_analysis ai_report'
+        )
+        .populate(
+            'ai_analysis',
+            'institution_id application_id  analyzed_by input_data ai_output institution_details visual_detection scores final_decision ai_total_score final_status parameter_compliance_score status error run_count run_at'
         );
 
     if (!institutes)
