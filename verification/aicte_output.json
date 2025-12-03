@@ -1,0 +1,33 @@
+{
+    "institution_details": {
+        "name": "Global Technical University",
+        "category": "UNIVERSITY",
+        "head_title": "Vice Chancellor",
+        "head_name": "Head Name Dr. Ananya Sharma\nAddress Tech City",
+        "corpus_fund": 150000000,
+        "students": 1380,
+        "faculty": 144,
+        "faculty_ratio": 9.58,
+        "admin_area": 2500,
+        "computers": 726
+    },
+    "visual_detection": {
+        "Classroom": "missing",
+        "Library": "missing",
+        "Laboratory": "missing",
+        "College Building": "missing"
+    },
+    "scores": {
+        "financial_score": 100,
+        "faculty_score": 100,
+        "infra_score": 100,
+        "visual_score": 0.0,
+        "total_score": 75.0
+    },
+    "final_decision": {
+        "status": "Rejected",
+        "reasons": [
+            "Missing required images: Classroom, Library, Laboratory"
+        ]
+    }
+}
