@@ -3,7 +3,7 @@ import { processAIAnalysis, retryAIAnalysis } from '../controllers/ai_analysis.c
 
 const router = express.Router();
 
-router.post('/process', processAIAnalysis );
-router.post('/retry', retryAIAnalysis );
+router.post('/process/:id', processAIAnalysis );
+router.post('/retry/:id', retryAIAnalysis );
 
 export default router;

@@ -2,6 +2,7 @@ import { asyncHandler } from '../services/asyncHandler.js';
 import Institution from '../models/institution.model.js';
 import Parameter from '../models/institution_parameter.model.js';
 import Document from '../models/document.model.js';
+import AIAnalysis from '../models/ai_analysis.model.js';
 
 export const createInstitute = asyncHandler(async (req, res) => {
     const {

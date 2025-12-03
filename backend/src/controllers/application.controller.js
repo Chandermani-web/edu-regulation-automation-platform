@@ -111,7 +111,7 @@ export const getApplication = asyncHandler(async (req, res) => {
         });
     }
 
-    const app = await Application.findOne({ user_id })
+    const app = await Application.find({ user_id })
         .populate('submitted_by', 'name email role')
         .populate(
             'institution_id',

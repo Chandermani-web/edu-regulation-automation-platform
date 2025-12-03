@@ -4,6 +4,9 @@ import Application from "../models/application.model.js";
 import mongoose from "mongoose";
 import { asyncHandler } from "../services/asyncHandler.js";
 
+// maybe we can use this so if some one want to do some operation on it, so this is useless now but keep it for future use, because now i findout other way to send the data efficient and without much load, i connect the ai analysis with application directly
+// maybe we had not to do made this but itso okay, we can use this in future if we want to do some operation on ai report directly
+
 export const getAllAIReports = asyncHandler(async (req, res) => {
     const reports = await AIReport.find()
         .populate("application_id")

@@ -1,6 +1,7 @@
 import AIAnalysis from '../models/ai_analysis.model.js';
 import Application from '../models/application.model.js';
 import AIReport from '../models/ai_report.model.js';
+import Institution from '../models/institution.model.js';
 import mongoose from 'mongoose';
 import axios from 'axios';
 import { asyncHandler } from '../services/asyncHandler.js';
@@ -21,7 +22,8 @@ async function callPythonGateway(payload) {
 }
 
 export const processAIAnalysis = asyncHandler(async (req, res) => {
-    const { applicationId } = req.body;
+    const { applicationId } = req.params;
+    console.log(applicationId);
 
     if (!mongoose.Types.ObjectId.isValid(applicationId)) {
         return res
@@ -86,6 +88,23 @@ export const processAIAnalysis = asyncHandler(async (req, res) => {
             report_title: `AI Report for Application ${application._id}`,
             report_url: pythonResult?.report_url || '',
         });
+
+        const updatedApplication = await Application.findByIdAndUpdate(
+            application._id,
+            {
+                $push: { ai_analysis: analysis._id },
+                ai_report: report._id,
+            },
+            { new: true }
+        );
+
+        const updatedInstitution = await Institution.findByIdAndUpdate(
+            application.institution_id,
+            {
+                $push: { ai_analysis: analysis._id },
+            },
+            { new: true }
+        );
 
         return res.status(200).json({
             success: true,
@@ -154,7 +173,8 @@ export const processAIAnalysis = asyncHandler(async (req, res) => {
 // })
 
 export const retryAIAnalysis = asyncHandler(async (req, res) => {
-    const { analysisId } = req.body;
+    const { analysisId } = req.params;
+    console.log(analysisId)
 
     if (!mongoose.Types.ObjectId.isValid(analysisId)) {
         return res
@@ -211,6 +231,23 @@ export const retryAIAnalysis = asyncHandler(async (req, res) => {
             report_title: `AI Report for Application ${application._id}`,
             report_url: pythonResult?.report_url || '',
         });
+
+        const updatedApplication = await Application.findByIdAndUpdate(
+            application._id,
+            {
+                $push: { ai_analysis: analysis._id },
+                // ai_report: report._id,
+            },
+            { new: true }
+        );
+
+        const updatedInstitution = await Institution.findByIdAndUpdate(
+            application.institution_id,
+            {
+                $push: { ai_analysis: analysis._id },
+            },
+            { new: true }
+        );
 
         return res.status(200).json({
             success: true,
