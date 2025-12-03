@@ -1,1 +1,0 @@
-export const Database_Name = "edu-regulation-automation-platform";
