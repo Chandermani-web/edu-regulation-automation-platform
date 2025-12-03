@@ -39,7 +39,7 @@ const AICTESidebar = () => {
     { 
       name: "Review & Queries", 
       icon: <MessageSquare size={20} />, 
-      path: "/aicte/review-queries" 
+      path: "/aicte/queries-and-review" 
     },
     { 
       name: "Final Approval", 
