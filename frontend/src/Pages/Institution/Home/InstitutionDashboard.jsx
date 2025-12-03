@@ -393,9 +393,11 @@ const InstitutionDashboard = () => {
                   label="Basic Information"
                   items={[
                     { label: "Institution Name", value: institution?.name },
-                    { label: "AISHE Code", value: institution?.AISHE_code },
+                    // { label: "AISHE Code", value: institution?.AISHE_code },
                     { label: "NAAC Grade", value: institution?.NAAC_grade },
-                    { label: "District", value: institution?.district }
+                    // { label: "District", value: institution?.district },
+                    { label: "Total Faculty", value: institution?.total_faculty },
+                    { label: "Total Students", value: institution?.total_students }
                   ]}
                 />
                 <DetailCard

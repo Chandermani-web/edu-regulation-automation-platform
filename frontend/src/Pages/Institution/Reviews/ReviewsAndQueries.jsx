@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import StepProgress from "../../Components/StepProgress";
+import StepProgress from "../../../Components/StepProgress";
 import {
   MessageSquare,
   Send,
@@ -232,7 +232,7 @@ export default function ReviewAndQueryPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 p-6 flex justify-center items-start gap-8">
-      <StepProgress currentStep={4} />
+      <StepProgress currentStep={5} />
 
       <div className="max-w-7xl w-full">
         {/* HEADER SECTION */}

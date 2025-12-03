@@ -12,8 +12,8 @@ import InstitutionProfile from './Pages/Institution/InstitutionProfile';
 import ParametersEntry from './Pages/Institution/ParametersEntry';
 import DocumentUpload from './Pages/Institution/DocumentUpload';
 import ApplicationSubmission from './Pages/Institution/ApplicationSubmission';
-import Queries from './Pages/Institution/Queries';
-import Reviews from './Pages/Institution/Reviews';
+// import Queries from './Pages/Institution/Queries';
+// import Reviews from './Pages/Institution/Reviews';
 import AIAnalytics from './Pages/Institution/AIAnalytics';
 import AIReports from './Pages/Institution/AIReports';
 import Loading from './Utils/Loading';
@@ -44,6 +44,7 @@ import SuperAdminUniversities from './Pages/Super_admin/SuperAdminUniversities';
 import SuperAdminReviewsAndQueries from './Pages/Super_admin/SuperAdminReviewsAndQueries';
 import SuperAdminNIRFRanking from './Pages/Super_admin/SuperAdminNIRFRanking';
 import SuperAdminColleges from './Pages/Super_admin/SuperAdminColleges';
+import ReviewAndQueryPage from './Pages/Institution/Reviews/ReviewsAndQueries';
 
 
 const App = () => {
@@ -71,8 +72,9 @@ const App = () => {
           <Route path="/institution/parameters/:id" element={auth ? role == "institution" ? <ParametersEntry /> : <LandingPage /> : <LandingPage />} />
           <Route path="/institution/documents/:id" element={auth ? role == "institution" ? <DocumentUpload /> : <LandingPage /> : <LandingPage />} />
           <Route path="/institution/application-submission/:id" element={auth ? role == "institution" ? <ApplicationSubmission /> : <LandingPage /> : <LandingPage />} />
-          <Route path="/institution/queries" element={auth ? role == "institution" ? <Queries/> : <LandingPage /> : <LandingPage />} />
-          <Route path="/institution/reviews" element={auth ? role == "institution" ? <Reviews/> : <LandingPage /> : <LandingPage />} />
+          {/* <Route path="/institution/queries" element={auth ? role == "institution" ? <Queries/> : <LandingPage /> : <LandingPage />} />
+          <Route path="/institution/reviews" element={auth ? role == "institution" ? <Reviews/> : <LandingPage /> : <LandingPage />} /> */}
+          <Route path='/institution/queries-and-review' element={auth ? role == "institution" ? <ReviewAndQueryPage /> : <LandingPage /> : <LandingPage />} />
           <Route path="/institution/ai-analysis/:id" element={auth ? role == "institution" ? <AIAnalytics /> : <LandingPage /> : <LandingPage />} />
           <Route path="/institution/ai-reports/:id" element={auth ? role == "institution" ? <AIReports /> : <LandingPage /> : <LandingPage />} />
           <Route path='/institution/ai-analysis' element={auth ? role == "institution" ? <AIAnalyticsAndReports  /> : <LandingPage /> : <LandingPage />} />
