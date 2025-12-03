@@ -12,11 +12,11 @@ export const AppProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
 
   // current institution id for filling the details (parameters, documents, application)
-  const [currentInstitutionId, setCurrentInstitutionId] = useState(()=>{
+  const [currentInstitutionId, setCurrentInstitutionId] = useState(() => {
     return localStorage.getItem("currentInstitutionId") || null;
   });
-  const [currentInstitutionData, setCurrentInstitutionData] = useState(()=>
-    JSON.parse(localStorage.getItem("currentInstitutionData")) || null
+  const [currentInstitutionData, setCurrentInstitutionData] = useState(
+    () => JSON.parse(localStorage.getItem("currentInstitutionData")) || null
   );
 
   // for users
@@ -80,14 +80,11 @@ export const AppProvider = ({ children }) => {
     setLoading(true);
     try {
       const response = await fetch(
-        `${getApiUrl()}/api/institution/application/get`,
+        `${getApiUrl()}/api/institution/application`,
         {
-          method: "POST",
+          method: "GET",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({
-            institution_id: institutionDetails?._id,
-          }),
         }
       );
       if (response.ok) {
@@ -134,7 +131,7 @@ export const AppProvider = ({ children }) => {
       );
       if (response.ok) {
         const data = await response.json();
-        setAllApplicationDetails(data);
+        setAllApplicationDetails(data.applications);
       }
     } catch (err) {
       console.error("Error fetching all applications:", err);
@@ -145,28 +142,41 @@ export const AppProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    const init = async () => {
-      await fetchUser();
-      // if the user is has logged in
-      if (auth) {
-        
-        await fetchInstitutionById();
-        // if the institution details are available
-        if (institutionDetails?._id) {
-          await Promise.all([
-            fetchApplicationById(),
-            fetchAllInstitutions(),
-            fetchAllApplications(),
-          ]);
-        }
-      }
-
-    };
-    init();
+    fetchUser();
   }, []);
 
-  console.log("Institution Details in Context:", institutionDetails);
+  useEffect(() => {
+    if (auth && user) {
+      fetchInstitutionById();
+    }
+  }, [auth, user]);
 
+  useEffect(() => {
+      const init = async () => {
+        if (auth && user) {
+          if (role === "institution") {
+            await fetchApplicationById();
+          } else if (role === "aicte" || role === "ugc" || role === "super_admin") {
+            await fetchAllInstitutions();
+            await fetchAllApplications();
+          }
+      }
+    }
+
+    setLoading(true);
+    init();
+    setLoading(false);
+  }, [auth, user, role]);
+
+  console.log(user);
+
+  // for display the institution and application details in console for debugging
+  console.log("Institution Details in Context:", institutionDetails);
+  console.log("Application Details in Context:", applicationDetails);
+
+  // for ugc and aicte
+  console.log("All Institution Details in Context:", allInstitutionDetails);
+  console.log("All Application Details in Context:", allApplicationDetails);
   const value = {
     auth,
     setAuth,

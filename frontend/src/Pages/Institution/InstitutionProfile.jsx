@@ -6,7 +6,8 @@ import AppContext from "../../Context/UseContext.jsx";
 
 const InstitutionProfile = () => {
   const navigate = useNavigate();
-  const { setCurrentInstitutionId, setCurrentInstitutionData } = useContext(AppContext);
+  const { setCurrentInstitutionId, setCurrentInstitutionData } =
+    useContext(AppContext);
 
   // ================= STATE ACCORDING TO YOUR SCHEMA =================
   const [institutionData, setInstitutionData] = useState({
@@ -15,6 +16,7 @@ const InstitutionProfile = () => {
     // basic details
     name: "",
     email: "",
+    phone: "",
     type: "",
     established_year: "",
     institution_code: "",
@@ -30,6 +32,10 @@ const InstitutionProfile = () => {
     NIRF_rank: "",
     AISHE_code: "",
     UDISE_code: "",
+
+    // faculty and student details
+    total_faculty: "",
+    total_students: "",
 
     website: "",
 
@@ -86,11 +92,15 @@ const InstitutionProfile = () => {
         setCurrentInstitutionId(data.institution._id);
         localStorage.setItem("currentInstitutionId", data.institution._id);
         setCurrentInstitutionData(data.institution);
-        localStorage.setItem("currentInstitutionData", JSON.stringify(data.institution));
+        localStorage.setItem(
+          "currentInstitutionData",
+          JSON.stringify(data.institution)
+        );
         toast.success("Institution profile created successfully", {
           position: "top-center",
           autoClose: 1000,
-          onClose: () => navigate(`/institution/parameters/${data.institution._id}`),
+          onClose: () =>
+            navigate(`/institution/parameters/${data.institution._id}`),
         });
       } else {
         console.error("Failed to create institution profile");
@@ -101,8 +111,7 @@ const InstitutionProfile = () => {
         position: "top-center",
         autoClose: 3000,
       });
-    }
-    finally {
+    } finally {
       setInstitutionData({
         // basic details
         name: "",
@@ -171,17 +180,58 @@ const InstitutionProfile = () => {
             />
           </div>
 
-          <div>
-            <label className="block font-medium mb-2">Official Email *</label>
-            <input
-              type="email"
-              name="email"
-              value={institutionData.email}
-              onChange={handleChange}
-              className="w-full border p-3 rounded-lg"
-              placeholder="Enter official email"
-              required
-            />
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block font-medium mb-2">Official Email *</label>
+              <input
+                type="email"
+                name="email"
+                value={institutionData.email}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+                placeholder="Enter official email"
+                required
+              />
+            </div>
+            <div>
+              <label className="block font-medium mb-2">Phone *</label>
+              <input
+                type="text"
+                name="phone"
+                value={institutionData.phone}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+                placeholder="Enter phone number"
+                required
+              />
+            </div>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div>
+              <label className="block font-medium mb-2">Total Faculty</label>
+              <input
+                type="number"
+                name="total_faculty"
+                value={institutionData.total_faculty}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+                placeholder="Number of faculty members"
+                min="0"
+              />
+            </div>
+            <div>
+              <label className="block font-medium mb-2">Total Students</label>
+              <input
+                type="number"
+                name="total_students"
+                value={institutionData.total_students}
+                onChange={handleChange}
+                className="w-full border p-3 rounded-lg"
+                placeholder="Number of students"
+                min="0"
+              />
+            </div>
           </div>
 
           <div className="grid md:grid-cols-3 gap-6">
