@@ -13,8 +13,10 @@ import json
 # ---------------------------
 # MODEL PATHS
 # ---------------------------
-CLASSROOM_MODEL_PATH = "C:\\Users\\Amit\\Downloads\\AMIT WORK DSU (3)\\SIH ODISSA\\verification\\model\\classroom_classification.pt"
-LIBRARY_MODEL_PATH   = "C:\\Users\\Amit\\Downloads\\AMIT WORK DSU (3)\\SIH ODISSA\\verification\\model\\library_classification.pt"
+# Get the directory where this script is located
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+CLASSROOM_MODEL_PATH = os.path.join(SCRIPT_DIR, "model", "classroom_classification.pt")
+LIBRARY_MODEL_PATH = os.path.join(SCRIPT_DIR, "model", "library_classification.pt")
 
 load_dotenv()
 

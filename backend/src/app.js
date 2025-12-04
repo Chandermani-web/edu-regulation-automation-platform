@@ -12,6 +12,7 @@ import ApplicationRoutes from './routes/application.route.js';
 
 import AIAnalysisRoutes from "./routes/ai_analysis.route.js";
 import AIReportRoutes from "./routes/ai_report.route.js";
+import VerificationRoutes from "./routes/verification.route.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -41,6 +42,7 @@ app.use("/api/institution/application",ApplicationRoutes);
 
 app.use("/api/ai-analysis", AIAnalysisRoutes);
 app.use("/api/ai-report", AIReportRoutes);
+app.use("/api/verification", VerificationRoutes);
 
 app.get("/",(req,res)=>{
     res.send("Server is running");
