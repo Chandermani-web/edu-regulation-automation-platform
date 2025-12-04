@@ -2,7 +2,6 @@ import { asyncHandler } from '../services/asyncHandler.js';
 import Institution from '../models/institution.model.js';
 import Parameter from '../models/institution_parameter.model.js';
 import Document from '../models/document.model.js';
-import AIAnalysis from '../models/ai_analysis.model.js';
 
 export const createInstitute = asyncHandler(async (req, res) => {
     const {
@@ -73,23 +72,27 @@ export const createInstitute = asyncHandler(async (req, res) => {
 });
 
 export const getInstituteByUser = asyncHandler(async (req, res) => {
-    const data = await Institution.find({ user_id: req.user.id })
-        .populate(
-            'parameters',
-            '_id parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
-        )
-        .populate(
+    const data = await Institution.find({ user_id: req.user.id }).populate(
+        'parameters',
+        '_id parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
+    )
+    .populate(
             'documents',
             'title file_url public_id category, uploaded_by upliaded_at'
-        )
-        .populate(
+    )
+    .populate(
             'applications',
+<<<<<<< HEAD
             'status submitted_by submitted_at updatedAt approved_by isApproved approved_by_user remarks'
         )
         .populate(
             'ai_analysis',
             'institution_id application_id  analyzed_by input_data ai_output institution_details visual_detection scores final_decision ai_total_score final_status parameter_compliance_score status error run_count run_at'
         );
+=======
+            'status submitted_by submitted_at updatedAt approved_by'
+    );
+>>>>>>> 70f44ec888b96bac5a76ba94e51bd4ea80c51050
     return res.status(201).json({ success: true, data });
 });
 
@@ -164,11 +167,15 @@ export const getAllInstitute = asyncHandler(async (req, res) => {
         )
         .populate(
             'applications',
+<<<<<<< HEAD
             'status submitted_by submitted_at updatedAt approved_by isApproved remarks ai_analysis ai_report approved_by_user'
         )
         .populate(
             'ai_analysis',
             'institution_id application_id  analyzed_by input_data ai_output institution_details visual_detection scores final_decision ai_total_score final_status parameter_compliance_score status error run_count run_at'
+=======
+            'status submitted_by submitted_at updatedAt approved_by'
+>>>>>>> 70f44ec888b96bac5a76ba94e51bd4ea80c51050
         );
 
     if (!institutes)

@@ -1,151 +1,71 @@
 import React from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  UserCircle,
   FileSpreadsheet,
+  FileUp,
+  FileCheck,
   MessageSquare,
+  MessageCircleQuestion,
+  Bot,
+  FileText,
   LogOut,
-  Building2,
-  Shield,
-  Award,
-  ChevronRight
 } from "lucide-react";
 
 const Sidebar = () => {
   const location = useLocation();
-  const navigate = useNavigate();
 
   const menuItems = [
-    { 
-      name: "Dashboard", 
-      icon: <LayoutDashboard size={20} />, 
-      path: "/ugc/dashboard" 
-    },
-    { 
-      name: "Latest Applications", 
-      icon: <FileSpreadsheet size={20} />, 
-      path: "/ugc/latest-application" 
-    },
-    { 
-      name: "Approved Colleges", 
-      icon: <Building2 size={20} />, 
-      path: "/ugc/college" 
-    },
-    { 
-      name: "NIRF Ranking", 
-      icon: <Award size={20} />, 
-      path: "/ugc/nirf-ranking" 
-    },
-    { 
-      name: "Review & Queries", 
-      icon: <MessageSquare size={20} />, 
-      path: "/ugc/review-queries" 
-    },
-    { 
-      name: "Final Approval", 
-      icon: <Shield size={20} />, 
-      path: "/ugc/final-approval" 
-    },
+    { name: "Dashboard", icon: <LayoutDashboard size={18} />, path: "/dashboard" },
+    { name: "Institution Profile", icon: <UserCircle size={18} />, path: "/institution/profile" },
+    { name: "Parameters Entry", icon: <FileSpreadsheet size={18} />, path: "/parameters" },
+    { name: "Document Upload", icon: <FileUp size={18} />, path: "/documents" },
+    { name: "Applications", icon: <FileCheck size={18} />, path: "/applications" },
+    { name: "Queries", icon: <MessageSquare size={18} />, path: "/queries" },
+    { name: "Reviews", icon: <MessageCircleQuestion size={18} />, path: "/reviews" },
+    { name: "AI Analytics", icon: <Bot size={18} />, path: "/ai-analytics" },
+    { name: "AI Reports", icon: <FileText size={18} />, path: "/ai-reports" },
   ];
 
-  const handleLogout = async () => {
-    try {
-      const response = await fetch('http://localhost:3000/api/auth/logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include'
-      });
-      
-      if (response.ok) {
-        localStorage.removeItem("edu-relational-automation-platform");
-        localStorage.removeItem("userRole");
-        navigate('/');
-        window.location.reload();
-      } else {
-        console.error("Logout failed with status:", response.status);
-      }
-    } catch (err) {
-      console.error("Logout failed:", err);
-      // Fallback to local logout
-      localStorage.clear();
-      navigate('/');
-    }
-  };
-
   return (
-    <div className="h-screen w-72 bg-gradient-to-b from-gray-50 to-white border-r border-gray-200 flex flex-col shadow-xl sticky top-0">
-      
-      {/* Header Section */}
-      <div className="p-6 pb-4">
-        <div className="flex items-center gap-4 mb-2">
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 p-3 rounded-2xl shadow-lg">
-            <Building2 size={28} className="text-white" />
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-gray-800">UGC</h1>
-            <p className="text-sm text-gray-600 font-medium">Evaluation Portal</p>
-          </div>
-        </div>
-        <div className="mt-4 flex items-center gap-2 text-sm text-blue-700 bg-blue-50 px-3 py-2 rounded-lg">
-          <Shield size={16} />
-          <span className="font-semibold">Administrator Access</span>
-        </div>
-      </div>
+    <div className="h-screen w-64 bg-[#0F172A] text-white p-6 flex flex-col shadow-lg">
 
-      <div className="h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent mx-6" />
+      {/* Logo */}
+      <h2 className="text-xl font-bold mb-10 tracking-wide text-blue-300">
+        Menu
+      </h2>
 
-      {/* Navigation Section */}
-      <div className="flex-1 px-4 py-6 overflow-y-auto">
-        <nav className="space-y-1">
-          <p className="px-4 text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">
-            Main Navigation
-          </p>
-          {menuItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            const isActiveStyle = location.pathname.startsWith(item.path) && item.path !== "/ugc";
+      {/* Menu List */}
+      <ul className="flex-1 space-y-3">
+        {menuItems.map((item) => {
+          const isActive = location.pathname === item.path;
 
-            return (
+          return (
+            <li key={item.name}>
               <Link
-                key={item.name}
                 to={item.path}
-                className={`flex items-center justify-between gap-3 px-4 py-3 rounded-xl transition-all duration-200 group
-                  ${isActive || isActiveStyle 
-                    ? "bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg shadow-blue-100" 
-                    : "text-gray-700 hover:bg-gray-100 hover:text-gray-900 hover:shadow"
-                  }`}
+                className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all duration-200 
+                 ${isActive ? "bg-blue-600 text-white shadow" : "text-gray-300 hover:bg-blue-500/20"}
+               `}
               >
-                <div className="flex items-center gap-3">
-                  <div className={`${isActive || isActiveStyle ? "text-white" : "text-gray-500 group-hover:text-blue-600"}`}>
-                    {item.icon}
-                  </div>
-                  <span className="font-medium">{item.name}</span>
-                </div>
-                {(isActive || isActiveStyle) && (
-                  <ChevronRight size={16} className="text-white/80" />
-                )}
+                {item.icon}
+                <span className="font-medium">{item.name}</span>
               </Link>
-            );
-          })}
-        </nav>
-      </div>
+            </li>
+          );
+        })}
+      </ul>
 
-      {/* Footer & Logout Section */}
-      <div className="p-6 pt-4 border-t border-gray-200">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-600 border border-gray-200 hover:border-red-200 transition-all duration-200 group"
+      {/* Logout Button */}
+      <div className="mt-6">
+        <Link
+          to="/"
+          className="flex items-center gap-3 px-4 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition-all duration-200"
         >
-          <div className="p-1.5 rounded-lg bg-red-50 group-hover:bg-red-100 transition-colors">
-            <LogOut size={18} className="text-red-500 group-hover:text-red-600" />
-          </div>
-          <span className="font-semibold">Logout</span>
-        </button>
-        
-        <div className="mt-4 text-center">
-          <p className="text-xs text-gray-500">
-            v2.1.0 • © 2024 UGC Portal
-          </p>
-        </div>
+          <LogOut size={18} />
+          <span className="font-medium">Logout</span>
+        </Link>
       </div>
     </div>
   );

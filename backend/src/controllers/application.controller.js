@@ -46,19 +46,15 @@ export const checkAndCreateApplication = async (institutionId, userId) => {
         });
 
         if (existing) {
-            console.log(
-                'Application already exists for institution:',
-                institutionId
-            );
+            console.log('Application already exists for institution:', institutionId);
             return { ok: false, reason: 'Application already exists' };
         }
 
         // 5. Create application
         const app = await Application.create({
-            user_id: userId,
             institution_id: institutionId,
             status: 'submitted',
-            approved_by: institution.type, // 'ugc' or 'aicte'
+            approved_by: institution.type,
             submitted_at: new Date(),
             submitted_by: userId,
         });
@@ -101,17 +97,16 @@ export const createApplicationManually = asyncHandler(async (req, res) => {
 });
 
 export const getApplication = asyncHandler(async (req, res) => {
-    const user_id = req.user.id;
-    console.log(user_id);
+    const { institution_id } = req.query;
 
-    if (!user_id) {
+    if (!institution_id) {
         return res.status(400).json({
             success: false,
-            message: 'Useer ID is required',
+            message: 'Institution ID is required',
         });
     }
 
-    const app = await Application.find({ user_id })
+    const app = await Application.findOne({ institution_id })
         .populate('submitted_by', 'name email role')
         .populate(
             'institution_id',
@@ -180,11 +175,7 @@ export const getAllApplications = asyncHandler(async (req, res) => {
             'ai_analysis',
             'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
         )
-        .populate('ai_report', 'report_title report_url created_at')
-        .populate(
-            'ai_analysis',
-            'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
-        )
+        .populate('ai_report', '')
         .sort({ submitted_at: -1 }); // newest first
 
     return res.json({
@@ -193,6 +184,7 @@ export const getAllApplications = asyncHandler(async (req, res) => {
         applications: apps,
     });
 });
+<<<<<<< HEAD
 
 // for approving or rejecting application by ugc , aicte and super_admin
 export const ApprovedOrRejectApplication = asyncHandler(async (req, res) => {
@@ -233,3 +225,5 @@ export const ApprovedOrRejectApplication = asyncHandler(async (req, res) => {
         application,
     });
 });
+=======
+>>>>>>> 70f44ec888b96bac5a76ba94e51bd4ea80c51050

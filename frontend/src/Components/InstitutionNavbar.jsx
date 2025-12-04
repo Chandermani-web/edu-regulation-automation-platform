@@ -32,7 +32,7 @@ export default function InstitutionNavbar() {
       description: "Manage Submissions"
     },
     {
-      path: "/institution/queries-and-review",
+      path: "/institution/reviews",
       icon: ClipboardCheck,
       label: "Reviews & Queries",
       description: "Status & Communications"

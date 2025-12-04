@@ -11,3 +11,4 @@ const aiReportSchema = new mongoose.Schema({
 const AIReport = mongoose.model("AIReport", aiReportSchema);
 
 export default AIReport;
+    
