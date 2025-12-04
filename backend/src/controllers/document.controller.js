@@ -82,30 +82,30 @@ export const uploadDocument = asyncHandler(async (req, res) => {
 });
 
 // // update the document
-// export const updateDocument = asyncHandler(async (req, res) => {
-//     const { id } = req.body;
-//     const updates = (({ title, applicationId }) => ({
-//         title,
-//         application_id: applicationId,
-//     }))(req.body);
+export const updateDocument = asyncHandler(async (req, res) => {
+    const { id } = req.body;
+    const updates = (({ title, applicationId }) => ({
+        title,
+        application_id: applicationId,
+    }))(req.body);
 
-//     const doc = await Document.findByIdAndUpdate(id, updates, { new: true });
+    const doc = await Document.findByIdAndUpdate(id, updates, { new: true });
 
-//     if (!doc)
-//         return res
-//             .status(404)
-//             .json({ success: false, message: 'Document not found' });
+    if (!doc)
+        return res
+            .status(404)
+            .json({ success: false, message: 'Document not found' });
 
-//     await Institution.findByIdAndUpdate(doc.institution_id, {
-//         $pull: { documents: doc._id },
-//     });
+    await Institution.findByIdAndUpdate(doc.institution_id, {
+        $pull: { documents: doc._id },
+    });
 
-//     await Institution.findByIdAndUpdate(doc.institution_id, {
-//         $push: { documents: doc._id },
-//     });
+    await Institution.findByIdAndUpdate(doc.institution_id, {
+        $push: { documents: doc._id },
+    });
 
-//     res.json({ success: true, data: doc });
-// });
+    res.json({ success: true, data: doc });
+});
 
 // delete the document
 export const deleteDocument = asyncHandler(async (req, res) => {
@@ -143,35 +143,35 @@ export const deleteDocument = asyncHandler(async (req, res) => {
 });
 
 // // get the document
-// export const getDocumentsByInstitution = asyncHandler(async (req, res) => {
-//     const { institution_id } = req.body; // or req.query if GET request
-//     // const { institutionId } = req.query;
+export const getDocumentsByInstitution = asyncHandler(async (req, res) => {
+    const { institution_id } = req.body; // or req.query if GET request
+    // const { institutionId } = req.query;
 
-//     console.log('Body:', req.body);
+    console.log('Body:', req.body);
 
-//     if (!institution_id)
-//         return res
-//             .status(400)
-//             .json({ success: false, message: 'institutionId is required' });
+    if (!institution_id)
+        return res
+            .status(400)
+            .json({ success: false, message: 'institutionId is required' });
 
-//     const documents = await Document.find({ institution_id: institution_id })
-//         .populate('uploaded_by', 'name email role')
-//         .populate('application', 'status submitted_at'); // optional
+    const documents = await Document.find({ institution_id: institution_id })
+        .populate('uploaded_by', 'name email role')
+        .populate('application', 'status submitted_at'); // optional
 
-//     res.status(200).json({
-//         success: true,
-//         count: documents.length,
-//         documents,
-//     });
-// });
+    res.status(200).json({
+        success: true,
+        count: documents.length,
+        documents,
+    });
+});
 
-// // list of all document
-// export const listDocuments = asyncHandler(async (req, res) => {
-//     const list = await Document.find()
-//         .populate('institution_id', 'name type')
-//         .populate('application_id', 'status submitted_at')
-//         .populate('uploaded_by', 'name email role')
-//         .sort({ uploaded_at: -1 });
+// list of all document
+export const listDocuments = asyncHandler(async (req, res) => {
+    const list = await Document.find()
+        .populate('institution_id', 'name type')
+        .populate('application_id', 'status submitted_at')
+        .populate('uploaded_by', 'name email role')
+        .sort({ uploaded_at: -1 });
 
-//     res.json({ success: true, count: list.length, documents: list });
-// });
+    res.json({ success: true, count: list.length, documents: list });
+});
