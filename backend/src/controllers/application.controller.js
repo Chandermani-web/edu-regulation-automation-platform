@@ -198,6 +198,7 @@ export const getAllApplications = asyncHandler(async (req, res) => {
 export const ApprovedOrRejectApplication = asyncHandler(async (req, res) => {
     const { id } = req.params;
     const { action, remarks } = req.body; // 'approve' or 'reject'
+    const userId = req.user.id;
 
     console.log("USER:", req.user);
     console.log("BODY:", req.body);
@@ -223,6 +224,7 @@ export const ApprovedOrRejectApplication = asyncHandler(async (req, res) => {
     application.approved_by = req.user.role.toLowerCase();
     application.isApproved = action === 'approve';
     application.remarks = remarks;
+    application.approved_by_user = userId;
     await application.save();
 
     return res.json({

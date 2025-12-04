@@ -9,6 +9,7 @@ export const createInstitute = asyncHandler(async (req, res) => {
         name,
         type,
         email,
+        phone,
         established_year,
         institution_code,
         state,
@@ -22,6 +23,8 @@ export const createInstitute = asyncHandler(async (req, res) => {
         NIRF_rank,
         AISHE_code,
         UDISE_code,
+        total_faculty,
+        total_students,
     } = req.body;
 
     const existingInstitute = await Institution.findOne({
@@ -44,6 +47,7 @@ export const createInstitute = asyncHandler(async (req, res) => {
         name,
         type,
         email,
+        phone,
         established_year,
         institution_code,
         state,
@@ -57,6 +61,8 @@ export const createInstitute = asyncHandler(async (req, res) => {
         NIRF_rank,
         AISHE_code,
         UDISE_code,
+        total_faculty,
+        total_students,
     });
 
     return res.status(201).json({
@@ -78,7 +84,7 @@ export const getInstituteByUser = asyncHandler(async (req, res) => {
         )
         .populate(
             'applications',
-            'status submitted_by submitted_at updatedAt approved_by isApproved'
+            'status submitted_by submitted_at updatedAt approved_by isApproved approved_by_user remarks'
         )
         .populate(
             'ai_analysis',
@@ -92,6 +98,7 @@ export const updateInstitute = asyncHandler(async (req, res) => {
         name,
         type,
         email,
+        phone,
         established_year,
         institution_code,
         state,
@@ -105,6 +112,8 @@ export const updateInstitute = asyncHandler(async (req, res) => {
         NIRF_rank,
         AISHE_code,
         UDISE_code,
+        total_faculty,
+        total_students,
     } = req.body;
 
     const existingInstitution = await Institution.findOne({
@@ -116,6 +125,7 @@ export const updateInstitute = asyncHandler(async (req, res) => {
     // update field if provided
     if (name !== undefined) existingInstitution.name = name;
     if (state !== undefined) existingInstitution.state = state;
+    if (phone !== undefined) existingInstitution.phone = phone;
     if (district !== undefined) existingInstitution.district = district;
     if (address !== undefined) existingInstitution.address = address;
     if (established_year !== undefined)
@@ -133,6 +143,8 @@ export const updateInstitute = asyncHandler(async (req, res) => {
     if (AISHE_code !== undefined) existingInstitution.AISHE_code = AISHE_code;
     if (UDISE_code !== undefined) existingInstitution.UDISE_code = UDISE_code;
     if (courses !== undefined) existingInstitution.courses = courses;
+    if (total_faculty !== undefined) existingInstitution.total_faculty = total_faculty;
+    if (total_students !== undefined) existingInstitution.total_students = total_students;
 
     await existingInstitution.save();
     return res.status(200).json({
@@ -152,7 +164,7 @@ export const getAllInstitute = asyncHandler(async (req, res) => {
         )
         .populate(
             'applications',
-            'status submitted_by submitted_at updatedAt approved_by isApproved remarks ai_analysis ai_report'
+            'status submitted_by submitted_at updatedAt approved_by isApproved remarks ai_analysis ai_report approved_by_user'
         )
         .populate(
             'ai_analysis',

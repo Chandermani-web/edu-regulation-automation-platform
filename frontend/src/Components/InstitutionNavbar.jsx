@@ -21,7 +21,7 @@ export default function InstitutionNavbar() {
   const navItems = [
     {
       path: "/institution/dashboard",
-      icon: LayoutDashboard,
+      icon: LayoutDashboard,  
       label: "Dashboard",
       description: "Overview & Analytics"
     },

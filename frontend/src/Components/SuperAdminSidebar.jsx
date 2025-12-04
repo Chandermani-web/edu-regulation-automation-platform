@@ -22,7 +22,7 @@ const SuperAdminSidebar = () => {
       path: "/super-admin/dashboard" 
     },
     { 
-      name: "Latest Applications", 
+      name: "All Applications", 
       icon: <FileSpreadsheet size={20} />, 
       path: "/super-admin/latest-application" 
     },

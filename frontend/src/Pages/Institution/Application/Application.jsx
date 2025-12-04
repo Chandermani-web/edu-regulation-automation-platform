@@ -205,20 +205,37 @@ export default function InstitutionApplicationPage() {
                             <span className="inline-block bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-sm font-medium">
                               {inst.type.toUpperCase()}
                             </span>
+
                             <div>
                               {inst.applications &&
                               inst.applications.length > 0 ? (
-                                <span className="text-sm text-green-600 font-medium flex items-center gap-1">
-                                  <CheckCircle size={14} />
-                                  Application Submitted
-                                </span>
+                                inst.applications[inst.applications.length - 1]
+                                  .status === "approved" ? (
+                                  <span className="text-sm text-emerald-600 font-medium flex items-center gap-1">
+                                    <CheckCircle size={14} />
+                                    Approved
+                                  </span>
+                                ) : inst.applications[
+                                    inst.applications.length - 1
+                                  ].status === "rejected" ? (
+                                  <span className="text-sm text-rose-600 font-medium flex items-center gap-1">
+                                    <XCircle size={14} />
+                                    Rejected
+                                  </span>
+                                ) : (
+                                  <span className="text-sm text-amber-600 font-medium flex items-center gap-1">
+                                    <Clock size={14} />
+                                    Pending Review
+                                  </span>
+                                )
                               ) : (
-                                <span className="text-sm text-amber-600 font-medium flex items-center gap-1">
+                                <span className="text-sm text-gray-500 font-medium flex items-center gap-1">
                                   <Clock size={14} />
-                                  In Progress
+                                  No Application Submitted
                                 </span>
                               )}
                             </div>
+
                             <div>
                               <span className="text-sm text-slate-500 font-medium flex items-center gap-1">
                                 <Clock size={14} />
@@ -588,7 +605,6 @@ export default function InstitutionApplicationPage() {
                             </button>
                           )}
                         </div>
-                        
                       </div>
 
                       {/* Right Column - Parameters */}

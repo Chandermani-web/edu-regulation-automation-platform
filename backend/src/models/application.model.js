@@ -16,6 +16,7 @@ const applicationSchema = new mongoose.Schema({
         enum: ['ugc', 'aicte'],
         required: true,
     },
+    approved_by_user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     remarks: { type: String },
     isApproved: { type: Boolean, default: false },
     ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }],
