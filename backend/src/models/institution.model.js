@@ -10,6 +10,7 @@ const institutionSchema = new mongoose.Schema({
   // basic details
   name: { type: String, required: true, unique: true },
   email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true, unique: true },
   type: { type: String, enum: ['aicte', 'ugc'], required: true },
   established_year: Number,
   institution_code: String,
@@ -19,6 +20,10 @@ const institutionSchema = new mongoose.Schema({
   district: String,
   pincode: String,
   full_address: String,
+
+  // faculty and student details
+  total_faculty: Number,
+  total_students: Number,
 
   // accredentation and website
   NAAC_grade: { type: String },

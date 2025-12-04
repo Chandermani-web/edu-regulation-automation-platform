@@ -184,3 +184,46 @@ export const getAllApplications = asyncHandler(async (req, res) => {
         applications: apps,
     });
 });
+<<<<<<< HEAD
+
+// for approving or rejecting application by ugc , aicte and super_admin
+export const ApprovedOrRejectApplication = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    const { action, remarks } = req.body; // 'approve' or 'reject'
+    const userId = req.user.id;
+
+    console.log("USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("PARAM:", req.params);
+
+    if (!['approve', 'reject'].includes(action)) {
+        return res.status(400).json({
+            success: false,
+            message: "Action must be either 'approve' or 'reject'",
+        });
+    }
+
+    const application = await Application.findById(id);
+
+    if (!application) {
+        return res.status(404).json({
+            success: false,
+            message: 'Application not found',
+        });
+    }
+
+    application.status = action === 'approve' ? 'approved' : 'rejected';
+    application.approved_by = req.user.role.toLowerCase();
+    application.isApproved = action === 'approve';
+    application.remarks = remarks;
+    application.approved_by_user = userId;
+    await application.save();
+
+    return res.json({
+        success: true,
+        message: `Application ${action}d successfully`,
+        application,
+    });
+});
+=======
+>>>>>>> 70f44ec888b96bac5a76ba94e51bd4ea80c51050

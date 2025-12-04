@@ -82,12 +82,12 @@ export const processAIAnalysis = asyncHandler(async (req, res) => {
 
         await analysis.save();
 
-        const report = await AIReport.create({
-            application_id: application._id,
-            ai_analysis_id: analysis._id,
-            report_title: `AI Report for Application ${application._id}`,
-            report_url: pythonResult?.report_url || '',
-        });
+        // const report = await AIReport.create({
+        //     application_id: application._id,
+        //     ai_analysis_id: analysis._id,
+        //     report_title: `AI Report for Application ${application._id}`,
+        //     report_url: pythonResult?.report_url || '',
+        // });
 
         const updatedApplication = await Application.findByIdAndUpdate(
             application._id,
@@ -225,12 +225,12 @@ export const retryAIAnalysis = asyncHandler(async (req, res) => {
 
         await analysis.save();
 
-        const report = await AIReport.create({
-            application_id: application._id,
-            ai_analysis_id: analysis._id,
-            report_title: `AI Report for Application ${application._id}`,
-            report_url: pythonResult?.report_url || '',
-        });
+        // const report = await AIReport.create({
+        //     application_id: application._id,
+        //     ai_analysis_id: analysis._id,
+        //     report_title: `AI Report for Application ${application._id}`,
+        //     report_url: pythonResult?.report_url || '',
+        // });
 
         const updatedApplication = await Application.findByIdAndUpdate(
             application._id,
