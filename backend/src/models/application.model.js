@@ -13,13 +13,15 @@ const applicationSchema = new mongoose.Schema({
     },
     approved_by: {
         type: String,
-        enum: ['aicte', 'ugc'],
+        enum: ['aicte', 'ugc', 'super_admin'],
     },
     remarks: { type: String },
     isApproved: { type: Boolean, default: false },
     ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }],
     ai_report: { type: mongoose.Schema.Types.ObjectId, ref: 'AIReport' },
     submitted_at: { type: Date, default: Date.now },
+}, {
+    timestamps: true
 });
 
 const Application = mongoose.model('Application', applicationSchema);

@@ -36,13 +36,23 @@ const InstitutionDashboard = () => {
   const navigate = useNavigate();
   const { institutionDetails, applicationDetails } = useContext(AppContext);
 
-  const institution = institutionDetails?.data?.[0] || {};
-  const aiAnalysis = institutionDetails?.ai_analysis || [];
+  // Debug logs
+  console.log('InstitutionDashboard - institutionDetails:', institutionDetails);
+  console.log('InstitutionDashboard - applicationDetails:', applicationDetails);
+  console.log('InstitutionDashboard - applicationDetails type:', typeof applicationDetails);
+  console.log('InstitutionDashboard - applicationDetails isArray:', Array.isArray(applicationDetails));
+
+  // institutionDetails is now a single object, not an array with data property
+  const institution = institutionDetails || {};
+  const aiAnalysis = institution?.ai_analysis || [];
   const aiData = aiAnalysis?.[0] || {};
 
   const applications = Array.isArray(applicationDetails)
     ? applicationDetails
     : [];
+
+  console.log('InstitutionDashboard - applications array:', applications);
+  console.log('InstitutionDashboard - applications.length:', applications.length);
 
   /* -------------------- STATES -------------------- */
   const [page, setPage] = useState(1);
@@ -59,8 +69,8 @@ const InstitutionDashboard = () => {
     pending: applications.filter(a => a.status === "pending").length,
     rejected: applications.filter(a => a.status === "rejected").length,
     activeQueries: institution?.queries?.length || 0,
-    documentsUploaded: institution?.documents?.uploaded || 0,
-    totalDocuments: institution?.documents?.total || 0,
+    documentsUploaded: Array.isArray(institution?.documents) ? institution.documents.length : 0,
+    totalDocuments: Array.isArray(institution?.documents) ? institution.documents.length : 0,
     aiScore: aiData?.ai_total_score || 0,
     approvalRate: applications.length > 0 
       ? Math.round((applications.filter(a => a.status === "approved").length / applications.length) * 100) 

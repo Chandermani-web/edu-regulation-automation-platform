@@ -31,9 +31,13 @@ import AppContext from "../../../Context/UseContext";
 export default function InstitutionApplicationPage() {
   const navigate = useNavigate();
   const [expandedInstitution, setExpandedInstitution] = useState(null);
-  const { institutionDetails } = useContext(AppContext);
+  const { institutionDetails, applicationDetails, loading } = useContext(AppContext);
   const [aiLoading, setAiLoading] = useState(false);
   const [hoveredCard, setHoveredCard] = useState(null);
+
+  console.log('Application.jsx - institutionDetails:', institutionDetails);
+  console.log('Application.jsx - applicationDetails:', applicationDetails);
+  console.log('Application.jsx - loading:', loading);
 
   const handleAIAnalysis = async (applicationId) => {
     try {
@@ -66,7 +70,7 @@ export default function InstitutionApplicationPage() {
     }
   };
 
-  if (!institutionDetails || !institutionDetails.data) {
+  if (loading || !institutionDetails) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/10">
         <div className="text-center space-y-4">
@@ -87,7 +91,9 @@ export default function InstitutionApplicationPage() {
     );
   }
 
-  const institutions = institutionDetails.data;
+  // institutionDetails is now a single object, not an array with data property
+  // For institution users, wrap single institution in array to maintain compatibility with existing render logic
+  const institutions = institutionDetails ? [institutionDetails] : [];
 
   const StatusBadge = ({ status }) => {
     const config = {

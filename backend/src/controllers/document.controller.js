@@ -12,10 +12,11 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     console.log(institution_id, file?.originalname, title);
     console.log(req.body);
 
-    if (!institution_id)
+    // Validate institution_id
+    if (!institution_id || institution_id === 'null' || institution_id === 'undefined')
         return res
             .status(400)
-            .json({ ok: false, message: 'institution_id is required' });
+            .json({ ok: false, message: 'Valid institution_id is required' });
 
     if (!file)
         return res.status(400).json({ ok: false, message: 'No file uploaded' });

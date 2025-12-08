@@ -45,7 +45,8 @@ const AICTELatestApplication = () => {
   const [expandedInstitution, setExpandedInstitution] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [aicteApplications, setAicteApplications] = useState([]);
-  const { allInstitutionDetails } = useContext(AppContext);
+  const [totalParameterTemplates, setTotalParameterTemplates] = useState(120); // Default fallback
+  const { allInstitutionDetails, getApiUrl } = useContext(AppContext);
   const navigate = useNavigate();
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -80,38 +81,70 @@ const AICTELatestApplication = () => {
     }
   };
 
+  // Fetch total parameter templates count
+  useEffect(() => {
+    const fetchTotalTemplates = async () => {
+      try {
+        const response = await fetch(`${getApiUrl()}/api/super-admin/parameter-templates`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const activeTemplates = result.data?.filter(t => t.is_active !== false) || result.data || [];
+          setTotalParameterTemplates(activeTemplates.length);
+          console.log('Total active parameter templates:', activeTemplates.length);
+        }
+      } catch (error) {
+        console.error("Error fetching parameter templates:", error);
+        // Keep default value of 120
+      }
+    };
+    
+    fetchTotalTemplates();
+  }, [getApiUrl]);
+
   // Filter AICTE institutions and prepare application data
   useEffect(() => {
+    console.log('AICTELatestApplication - allInstitutionDetails:', allInstitutionDetails);
     if (allInstitutionDetails) {
       const filtered = allInstitutionDetails
         .filter(
           (institution) =>
-            institution.type === "college" && institution.type === "institution" &&
+            (institution.type === "college" || institution.type === "institution") &&
             institution.applications?.some(
               (app) => app.status === "submitted" && app.isApproved !== true
             )
         )
         .flatMap(
-          (institution) =>
-            institution.applications?.map((application) => ({
+          (institution) => {
+            console.log('Institution parameters:', institution.name, institution.parameters);
+            if (institution.parameters?.length > 0) {
+              console.log('First parameter sample:', institution.parameters[0].parameter_template_id);
+            }
+            return institution.applications?.map((application) => ({
               ...application,
               institution: institution,
-            })) || []
+            })) || [];
+          }
         );
+      console.log('AICTELatestApplication - filtered applications:', filtered);
       setAicteApplications(filtered);
     }
   }, [allInstitutionDetails]);
-
-  // Calculate progress for parameters
+  
   const calculateParameterProgress = (institution) => {
     if (!institution.parameters || institution.parameters.length === 0)
       return 0;
 
-    const completedParams = institution.parameters.filter(
-      (param) => param.is_compliant !== undefined
+    // Count parameters that have institution_value filled (not empty)
+    const filledParams = institution.parameters.filter(
+      (param) => param.institution_value && param.institution_value.trim() !== ''
     ).length;
 
-    return Math.round((completedParams / institution.parameters.length) * 100);
+    return Math.round((filledParams / totalParameterTemplates) * 100);
   };
 
   // Calculate progress for documents
@@ -214,9 +247,9 @@ const AICTELatestApplication = () => {
                       calculateDocumentProgress(institution);
                     const completedParams =
                       institution.parameters?.filter(
-                        (param) => param.is_compliant !== undefined
+                        (param) => param.institution_value && param.institution_value.trim() !== ''
                       ).length || 0;
-                    const totalParams = institution.parameters?.length || 0;
+                    const totalParams = totalParameterTemplates;
                     const uploadedDocs =
                       institution.documents?.filter(
                         (doc) => doc.file_url || doc.fileUrl
@@ -651,37 +684,62 @@ const AICTELatestApplication = () => {
                                       </h3>
 
                                       <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                                        {institution.parameters?.map(
-                                          (param) => {
-                                            let status = "pending";
-                                            if (param.is_compliant === true)
-                                              status = "compliant";
-                                            if (param.is_compliant === false)
-                                              status = "non_compliant";
+                                        {institution.parameters?.length > 0 ? (
+                                          institution.parameters.map(
+                                            (param, index) => {
+                                              console.log(`Parameter ${index}:`, param);
+                                              let status = "pending";
+                                              if (param.is_compliant === true)
+                                                status = "compliant";
+                                              if (param.is_compliant === false)
+                                                status = "non_compliant";
 
-                                            return (
-                                              <div
-                                                key={param._id}
-                                                className="group p-4 rounded-2xl bg-white/80 border border-slate-200/60 hover:border-blue-200/60 hover:shadow-md transition-all duration-300"
-                                              >
-                                                <div className="flex justify-between items-start gap-3">
-                                                  <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
-                                                      {param.parameter_name}
-                                                    </h4>
-                                                    {param.description && (
-                                                      <p className="text-slate-600 text-xs line-clamp-2">
-                                                        {param.description}
-                                                      </p>
-                                                    )}
+                                              // Get template data (nested) - handle both populated and unpopulated
+                                              const template = typeof param.parameter_template_id === 'object' && param.parameter_template_id !== null 
+                                                ? param.parameter_template_id 
+                                                : {};
+                                              const paramName = template.parameter_name || param.parameter_name || 'Unnamed Parameter';
+                                              const paramDescription = template.description || param.description || '';
+                                              const paramCategory = template.parameter_category || param.parameter_category || '';
+
+                                              return (
+                                                <div
+                                                  key={param._id || index}
+                                                  className="group p-4 rounded-2xl bg-white/80 border border-slate-200/60 hover:border-blue-200/60 hover:shadow-md transition-all duration-300"
+                                                >
+                                                  <div className="flex justify-between items-start gap-3">
+                                                    <div className="flex-1 min-w-0">
+                                                      <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
+                                                        {paramName}
+                                                      </h4>
+                                                      {paramDescription && (
+                                                        <p className="text-slate-600 text-xs line-clamp-2">
+                                                          {paramDescription}
+                                                        </p>
+                                                      )}
+                                                      {paramCategory && (
+                                                        <p className="text-slate-500 text-xs mt-1">
+                                                          Category: {paramCategory}
+                                                        </p>
+                                                      )}
+                                                      {param.institution_value && (
+                                                        <p className="text-blue-600 text-xs mt-1 font-medium">
+                                                          Value: {param.institution_value}
+                                                        </p>
+                                                      )}
+                                                    </div>
+                                                    <StatusBadge
+                                                      status={status}
+                                                    />
                                                   </div>
-                                                  <StatusBadge
-                                                    status={status}
-                                                  />
                                                 </div>
-                                              </div>
-                                            );
-                                          }
+                                              );
+                                            }
+                                          )
+                                        ) : (
+                                          <div className="text-center py-8 text-slate-500">
+                                            No parameters found
+                                          </div>
                                         )}
                                       </div>
                                     </div>

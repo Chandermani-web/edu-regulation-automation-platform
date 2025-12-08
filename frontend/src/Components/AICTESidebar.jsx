@@ -8,7 +8,8 @@ import {
   Building2,
   Shield,
   Award,
-  ChevronRight
+  ChevronRight,
+  GitCompare
 } from "lucide-react";
 
 const AICTESidebar = () => {
@@ -25,6 +26,11 @@ const AICTESidebar = () => {
       name: "Latest Applications", 
       icon: <FileSpreadsheet size={20} />, 
       path: "/aicte/latest-application" 
+    },
+    { 
+      name: "Institution Comparison", 
+      icon: <GitCompare size={20} />, 
+      path: "/aicte/comparison" 
     },
     { 
       name: "Approved Universities", 

@@ -1,8 +1,8 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Search, Eye, ChevronUp, ChevronDown, FileCheck, FileText, Folder, ExternalLink, Download, Clock } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Search, ChevronUp, ChevronDown, FileCheck, FileText, CheckCircle, XCircle, Folder, ExternalLink, Clock } from "lucide-react";
 import AppContext from "../../Context/UseContext.jsx";
 import SuperAdminLayout from "../../Components/SuperAdminLayout.jsx";
+import { toast } from "react-toastify";
 
 // Status Badge Component
 const StatusBadge = ({ status }) => {
@@ -29,11 +29,39 @@ const SuperAdminLatestApplication = () => {
   const [expandedInstitution, setExpandedInstitution] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [aicteApplications, setAicteApplications] = useState([]);
-  const { allInstitutionDetails } = useContext(AppContext);
-  const navigate = useNavigate();
+  const [totalParameterTemplates, setTotalParameterTemplates] = useState(120); // Default fallback
+  const [approvingId, setApprovingId] = useState(null);
+  const [rejectingId, setRejectingId] = useState(null);
+  const { allInstitutionDetails, getApiUrl, fetchAllInstitutions } = useContext(AppContext);
 
-  // Filter AICTE institutions and prepare application data
+  // Fetch total parameter templates count
   useEffect(() => {
+    const fetchTotalTemplates = async () => {
+      try {
+        const response = await fetch(`${getApiUrl()}/api/super-admin/parameter-templates`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const activeTemplates = result.data?.filter(t => t.is_active !== false) || result.data || [];
+          setTotalParameterTemplates(activeTemplates.length);
+          console.log('Total active parameter templates:', activeTemplates.length);
+        }
+      } catch (error) {
+        console.error("Error fetching parameter templates:", error);
+        // Keep default value of 120
+      }
+    };
+    
+    fetchTotalTemplates();
+  }, [getApiUrl]);
+
+  // Filter ALL institutions (not just AICTE) and prepare application data
+  useEffect(() => {
+    console.log('SuperAdminLatestApplication - allInstitutionDetails:', allInstitutionDetails);
     if (allInstitutionDetails) {
       const filtered = allInstitutionDetails
         .filter(institution => institution.applications?.some(app => app.status === "submitted" && app.isApproved !== true))
@@ -43,19 +71,21 @@ const SuperAdminLatestApplication = () => {
             institution: institution
           })) || []
         );
+      console.log('SuperAdminLatestApplication - filtered applications:', filtered);
       setAicteApplications(filtered);
     }
   }, [allInstitutionDetails]);
 
-  // Calculate progress for parameters
+  // Calculate progress for parameters (out of total parameter templates)
   const calculateParameterProgress = (institution) => {
     if (!institution.parameters || institution.parameters.length === 0) return 0;
     
-    const completedParams = institution.parameters.filter(
-      param => param.is_compliant !== undefined
+    // Count parameters that have institution_value filled (not empty)
+    const filledParams = institution.parameters.filter(
+      param => param.institution_value && param.institution_value.trim() !== ''
     ).length;
     
-    return Math.round((completedParams / institution.parameters.length) * 100);
+    return Math.round((filledParams / totalParameterTemplates) * 100);
   };
 
   // Calculate progress for documents
@@ -67,6 +97,69 @@ const SuperAdminLatestApplication = () => {
     ).length;
     
     return Math.round((uploadedDocs / institution.documents.length) * 100);
+  };
+
+  // Approve application
+  const handleApprove = async (applicationId) => {
+    if (!confirm("Are you sure you want to approve this application?")) return;
+    
+    setApprovingId(applicationId);
+    try {
+      const response = await fetch(`${getApiUrl()}/api/institution/application/${applicationId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          action: "approve",
+          remarks: "Approved by Super Admin"
+        })
+      });
+
+      if (response.ok) {
+        toast.success("Application approved successfully!");
+        await fetchAllInstitutions(); // Refresh data
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Failed to approve application");
+      }
+    } catch (error) {
+      console.error("Error approving application:", error);
+      toast.error("Failed to approve application");
+    } finally {
+      setApprovingId(null);
+    }
+  };
+
+  // Reject application
+  const handleReject = async (applicationId) => {
+    const remarks = prompt("Please provide a reason for rejection:");
+    if (!remarks) return;
+    
+    setRejectingId(applicationId);
+    try {
+      const response = await fetch(`${getApiUrl()}/api/institution/application/${applicationId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          action: "reject",
+          remarks: remarks
+        })
+      });
+
+      if (response.ok) {
+        toast.success("Application rejected");
+        await fetchAllInstitutions(); // Refresh data
+      } else {
+        const error = await response.json();
+        toast.error(error.message || "Failed to reject application");
+      }
+    } catch (error) {
+      console.error("Error rejecting application:", error);
+      toast.error("Failed to reject application");
+    } finally {
+      setRejectingId(null);
+    }
   };
 
   // Filter applications based on search term
@@ -86,13 +179,13 @@ const SuperAdminLatestApplication = () => {
     <SuperAdminLayout className="">
       <div className="flex flex-col">
         <div className="tracking-wide mb-8 leading-0.5">
-          <h2 className="text-2xl font-semibold mb-4">Latest Applications (AICTE)</h2>
+          <h2 className="text-2xl font-semibold mb-4">Latest Applications (All Institutions)</h2>
           <p className="text-gray-700">
-            Review and process new AICTE institutional applications
+            Review and process new institutional applications from all regulatory bodies
           </p>
           <div className="mt-2 flex items-center gap-2">
             <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              Showing only AICTE institutions
+              All Institutions
             </span>
             <span className="text-sm text-gray-600">
               {aicteApplications.length} application{aicteApplications.length !== 1 ? 's' : ''} found
@@ -133,9 +226,9 @@ const SuperAdminLatestApplication = () => {
                   const parameterProgress = calculateParameterProgress(institution);
                   const documentProgress = calculateDocumentProgress(institution);
                   const completedParams = institution.parameters?.filter(
-                    param => param.is_compliant !== undefined
+                    param => param.institution_value && param.institution_value.trim() !== ''
                   ).length || 0;
-                  const totalParams = institution.parameters?.length || 0;
+                  const totalParams = totalParameterTemplates;
                   const uploadedDocs = institution.documents?.filter(
                     doc => doc.file_url || doc.fileUrl
                   ).length || 0;
@@ -326,6 +419,14 @@ const SuperAdminLatestApplication = () => {
                                         if (param.is_compliant === true) status = "compliant";
                                         if (param.is_compliant === false) status = "non_compliant";
 
+                                        // Get template data (nested) - handle both populated and unpopulated
+                                        const template = typeof param.parameter_template_id === 'object' && param.parameter_template_id !== null 
+                                          ? param.parameter_template_id 
+                                          : {};
+                                        const paramName = template.parameter_name || param.parameter_name || 'Unnamed Parameter';
+                                        const paramDescription = template.description || param.description || '';
+                                        const paramCategory = template.parameter_category || param.parameter_category || '';
+
                                         return (
                                           <div
                                             key={param._id}
@@ -334,11 +435,21 @@ const SuperAdminLatestApplication = () => {
                                             <div className="flex justify-between items-start gap-3">
                                               <div className="flex-1 min-w-0">
                                                 <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
-                                                  {param.parameter_name}
+                                                  {paramName}
                                                 </h4>
-                                                {param.description && (
+                                                {paramDescription && (
                                                   <p className="text-slate-600 text-xs line-clamp-2">
-                                                    {param.description}
+                                                    {paramDescription}
+                                                  </p>
+                                                )}
+                                                {paramCategory && (
+                                                  <p className="text-slate-500 text-xs mt-1">
+                                                    Category: {paramCategory}
+                                                  </p>
+                                                )}
+                                                {param.institution_value && (
+                                                  <p className="text-blue-600 text-xs mt-1 font-medium">
+                                                    Value: {param.institution_value}
                                                   </p>
                                                 )}
                                               </div>
@@ -349,16 +460,25 @@ const SuperAdminLatestApplication = () => {
                                       })}
                                     </div>
                                   </div>
-                                  <div>
+                                  
+                                  {/* Approval Actions */}
+                                  <div className="flex gap-3">
                                     <button
-                                      onClick={() => navigate(`/aicte/final-approval?institutionId=${institution._id}&applicationId=${appId}`)}
-                                      className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                                      onClick={() => handleApprove(appId)}
+                                      disabled={approvingId === appId || rejectingId === appId}
+                                      className="flex-1 flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:transform-none"
                                     >
-                                      <ExternalLink
-                                        size={18}
-                                        className="group-hover:scale-110 transition-transform"
-                                      />
-                                      Approval Application
+                                      <CheckCircle size={18} />
+                                      {approvingId === appId ? "Approving..." : "Approve"}
+                                    </button>
+                                    
+                                    <button
+                                      onClick={() => handleReject(appId)}
+                                      disabled={approvingId === appId || rejectingId === appId}
+                                      className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:transform-none"
+                                    >
+                                      <XCircle size={18} />
+                                      {rejectingId === appId ? "Rejecting..." : "Reject"}
                                     </button>
                                   </div>
                                 </div>

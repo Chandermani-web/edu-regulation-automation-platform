@@ -49,6 +49,22 @@ export const getAIReportByApplication = asyncHandler(async (req, res) => {
     });
 });
 
+// Get AI reports by institution
+export const getAIReportsByInstitution = asyncHandler(async (req, res) => {
+    const { institutionId } = req.params;
+
+    const reports = await AIReport.find({ institution_id: institutionId })
+        .populate("application_id")
+        .populate("ai_analysis_id")
+        .sort({ created_at: -1 });
+
+    return res.status(200).json({
+        success: true,
+        count: reports.length,
+        data: reports,
+    });
+});
+
 export const getAIReportById = asyncHandler(async (req, res) => {
     const { reportId } = req.body;
 

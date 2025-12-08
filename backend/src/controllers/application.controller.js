@@ -72,7 +72,9 @@ export const checkAndCreateApplication = async (institutionId, userId) => {
 
 export const createApplicationManually = asyncHandler(async (req, res) => {
     const { institution_id } = req.body;
-    console.log(institution_id, req.user.id);
+    console.log('=== createApplicationManually called ===');
+    console.log('Institution ID:', institution_id);
+    console.log('User ID:', req.user.id);
 
     if (!institution_id)
         return res.status(400).json({
@@ -81,17 +83,23 @@ export const createApplicationManually = asyncHandler(async (req, res) => {
         });
 
     const result = await checkAndCreateApplication(institution_id, req.user.id);
+    console.log('checkAndCreateApplication result:', result);
 
     if (!result || !result.ok) {
+        console.error('Application creation failed:', result?.reason);
         return res.status(400).json({
             success: false,
             message: result?.reason || 'Application creation failed',
         });
     }
 
-    await Institution.findByIdAndUpdate(institution_id, {
-        $push: { applications: result.application._id },
-    });
+    console.log('Updating institution with application ID:', result.application._id);
+    const updatedInstitution = await Institution.findByIdAndUpdate(
+        institution_id,
+        { $push: { applications: result.application._id } },
+        { new: true }
+    );
+    console.log('Institution updated, applications array length:', updatedInstitution?.applications?.length);
 
     return res.status(201).json({
         success: true,
@@ -102,12 +110,13 @@ export const createApplicationManually = asyncHandler(async (req, res) => {
 
 export const getApplication = asyncHandler(async (req, res) => {
     const user_id = req.user.id;
-    console.log(user_id);
+    console.log('=== getApplication called ===');
+    console.log('User ID:', user_id);
 
     if (!user_id) {
         return res.status(400).json({
             success: false,
-            message: 'Useer ID is required',
+            message: 'User ID is required',
         });
     }
 
@@ -123,10 +132,16 @@ export const getApplication = asyncHandler(async (req, res) => {
         )
         .populate('ai_report', 'report_title report_url created_at');
 
-    if (!app) {
-        return res.status(404).json({
-            success: false,
-            message: 'No application found for this institution',
+    console.log('Applications found:', app.length);
+    console.log('Applications:', JSON.stringify(app, null, 2));
+
+    // find() returns an array, check length instead of null
+    if (!app || app.length === 0) {
+        console.log('No applications found for user:', user_id);
+        return res.json({
+            success: true,
+            application: [],
+            message: 'No applications found'
         });
     }
 
@@ -138,7 +153,9 @@ export const getApplication = asyncHandler(async (req, res) => {
 
 // to get all the application for ugc , aicte and super_admin
 export const getAllApplications = asyncHandler(async (req, res) => {
+    console.log('=== getAllApplications called ===');
     const userRole = req.user.role;
+    console.log('User role:', userRole);
 
     let filter = {};
 

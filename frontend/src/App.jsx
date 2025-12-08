@@ -44,6 +44,11 @@ import SuperAdminUniversities from './Pages/Super_admin/SuperAdminUniversities';
 import SuperAdminReviewsAndQueries from './Pages/Super_admin/SuperAdminReviewsAndQueries';
 import SuperAdminNIRFRanking from './Pages/Super_admin/SuperAdminNIRFRanking';
 import SuperAdminColleges from './Pages/Super_admin/SuperAdminColleges';
+import SuperAdminUserManagement from './Pages/Super_admin/SuperAdminUserManagement';
+import SuperAdminInstitutionManagement from './Pages/Super_admin/SuperAdminInstitutionManagement';
+import SuperAdminParameterManagement from './Pages/Super_admin/SuperAdminParameterManagement';
+import InstitutionComparison from './Pages/Super_admin/InstitutionComparison';
+import APIKeyManagement from './Pages/Super_admin/APIKeyManagement';
 import ReviewAndQueryPage from './Pages/Institution/Reviews/ReviewsAndQueries';
 import AiAnalyticsPage from './Pages/Institution/AiAnalyticsPage';
 
@@ -94,6 +99,7 @@ const App = () => {
           {/* aicte routes */}
           <Route path="/aicte/dashboard" element={auth ? role == "aicte" ? <AICTEDashboard /> : <LandingPage /> : <LandingPage />} />
           <Route path="/aicte/latest-application" element={auth ? role == "aicte" ? <AICTELatestApplication /> : <LandingPage /> : <LandingPage />} />
+          <Route path="/aicte/comparison" element={auth ? role == "aicte" ? <InstitutionComparison /> : <LandingPage /> : <LandingPage />} />
           <Route path="/aicte/queries-and-review" element={auth ? role == "aicte" ? <AICTEQueriesAndReview /> : <LandingPage /> : <LandingPage />} />
           <Route path="/aicte/university" element={auth ? role == "aicte" ? <University /> : <LandingPage /> : <LandingPage />} />
           <Route path="/aicte/final-approval" element={auth ? role == "aicte" ? <FinalApproval /> : <LandingPage /> : <LandingPage />} />
@@ -102,6 +108,11 @@ const App = () => {
 
           {/* super_admin routes */}
           <Route path="/super-admin/dashboard" element={auth ? role == "super_admin" ? <SuperAdminDashboard /> : <LandingPage /> : <LandingPage />} />
+          <Route path="/super-admin/users" element={auth ? role == "super_admin" ? <SuperAdminUserManagement /> : <LandingPage /> : <LandingPage />} />
+          <Route path="/super-admin/institutions" element={auth ? role == "super_admin" ? <SuperAdminInstitutionManagement /> : <LandingPage /> : <LandingPage />} />
+          <Route path="/super-admin/parameters" element={auth ? role == "super_admin" ? <SuperAdminParameterManagement /> : <LandingPage /> : <LandingPage />} />
+          <Route path="/super-admin/api-keys" element={auth ? role == "super_admin" ? <APIKeyManagement /> : <LandingPage /> : <LandingPage />} />
+          <Route path="/super-admin/comparison" element={auth ? role == "super_admin" ? <InstitutionComparison /> : <LandingPage /> : <LandingPage />} />
           <Route path="/super-admin/latest-application" element={auth ? role == "super_admin" ? <SuperAdminLatestApplication /> : <LandingPage /> : <LandingPage />} />
           <Route path="/super-admin/queries-and-review" element={auth ? role == "super_admin" ? <SuperAdminReviewsAndQueries /> : <LandingPage /> : <LandingPage />} />
           <Route path="/super-admin/university" element={auth ? role == "super_admin" ? <SuperAdminUniversities /> : <LandingPage /> : <LandingPage />} />

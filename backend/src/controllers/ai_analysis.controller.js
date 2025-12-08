@@ -388,3 +388,146 @@ export const retryAIAnalysis = asyncHandler(async (req, res) => {
         });
     }
 });
+
+// Get AI analysis by institution
+export const getAIAnalysisByInstitution = asyncHandler(async (req, res) => {
+    const { institutionId } = req.params;
+
+    const analysis = await AIAnalysis.find({ institution_id: institutionId })
+        .populate('application_id')
+        .sort({ createdAt: -1 });
+
+    res.status(200).json({
+        success: true,
+        count: analysis.length,
+        data: analysis
+    });
+});
+
+// Get historical performance comparison for institutions
+export const getInstitutionHistoricalComparison = asyncHandler(async (req, res) => {
+    const { institutionIds } = req.body; // Array of 2 institution IDs
+
+    if (!institutionIds || institutionIds.length !== 2) {
+        return res.status(400).json({
+            success: false,
+            message: 'Please provide exactly 2 institution IDs for comparison'
+        });
+    }
+
+    const [inst1Id, inst2Id] = institutionIds;
+
+    // Fetch all historical data for both institutions
+    const [inst1Analysis, inst2Analysis, inst1Reports, inst2Reports] = await Promise.all([
+        AIAnalysis.find({ institution_id: inst1Id }).populate('application_id').sort({ createdAt: 1 }),
+        AIAnalysis.find({ institution_id: inst2Id }).populate('application_id').sort({ createdAt: 1 }),
+        AIReport.find({ institution_id: inst1Id }).populate('application_id').sort({ created_at: 1 }),
+        AIReport.find({ institution_id: inst2Id }).populate('application_id').sort({ created_at: 1 })
+    ]);
+
+    // Process historical trends
+    const inst1Trends = processHistoricalTrends(inst1Analysis, inst1Reports);
+    const inst2Trends = processHistoricalTrends(inst2Analysis, inst2Reports);
+
+    // Calculate performance metrics
+    const inst1Metrics = calculatePerformanceMetrics(inst1Analysis, inst1Reports);
+    const inst2Metrics = calculatePerformanceMetrics(inst2Analysis, inst2Reports);
+
+    res.status(200).json({
+        success: true,
+        data: {
+            institution1: {
+                id: inst1Id,
+                trends: inst1Trends,
+                metrics: inst1Metrics,
+                totalAnalyses: inst1Analysis.length,
+                totalReports: inst1Reports.length
+            },
+            institution2: {
+                id: inst2Id,
+                trends: inst2Trends,
+                metrics: inst2Metrics,
+                totalAnalyses: inst2Analysis.length,
+                totalReports: inst2Reports.length
+            }
+        }
+    });
+});
+
+// Helper function to process historical trends
+function processHistoricalTrends(analyses, reports) {
+    const trends = {
+        scoreProgression: [],
+        complianceProgression: [],
+        categoryScores: {
+            infrastructure: [],
+            faculty: [],
+            academic: [],
+            compliance: []
+        },
+        timestamps: []
+    };
+
+    analyses.forEach((analysis, index) => {
+        const date = new Date(analysis.createdAt).toLocaleDateString();
+        trends.timestamps.push(date);
+        trends.scoreProgression.push(analysis.ai_total_score || 0);
+        trends.complianceProgression.push(analysis.parameter_compliance_score || 0);
+        
+        // Extract category scores
+        trends.categoryScores.infrastructure.push(analysis.scores?.infrastructure_score || 0);
+        trends.categoryScores.faculty.push(analysis.scores?.faculty_score || 0);
+        trends.categoryScores.academic.push(analysis.scores?.academic_score || 0);
+        trends.categoryScores.compliance.push(analysis.scores?.compliance_score || 0);
+    });
+
+    return trends;
+}
+
+// Helper function to calculate performance metrics
+function calculatePerformanceMetrics(analyses, reports) {
+    if (analyses.length === 0) {
+        return {
+            averageScore: 0,
+            highestScore: 0,
+            lowestScore: 0,
+            averageCompliance: 0,
+            improvementRate: 0,
+            consistencyScore: 0,
+            approvalRate: 0
+        };
+    }
+
+    const scores = analyses.map(a => a.ai_total_score || 0);
+    const complianceScores = analyses.map(a => a.parameter_compliance_score || 0);
+    
+    const averageScore = scores.reduce((a, b) => a + b, 0) / scores.length;
+    const highestScore = Math.max(...scores);
+    const lowestScore = Math.min(...scores);
+    const averageCompliance = complianceScores.reduce((a, b) => a + b, 0) / complianceScores.length;
+    
+    // Calculate improvement rate (comparing first and last score)
+    const improvementRate = scores.length > 1 
+        ? ((scores[scores.length - 1] - scores[0]) / scores[0]) * 100 
+        : 0;
+    
+    // Calculate consistency (standard deviation)
+    const variance = scores.reduce((acc, score) => acc + Math.pow(score - averageScore, 2), 0) / scores.length;
+    const stdDev = Math.sqrt(variance);
+    const consistencyScore = Math.max(0, 100 - (stdDev * 2)); // Lower std dev = higher consistency
+    
+    // Calculate approval rate
+    const approvedReports = reports.filter(r => r.final_decision === 'approved').length;
+    const approvalRate = reports.length > 0 ? (approvedReports / reports.length) * 100 : 0;
+
+    return {
+        averageScore: parseFloat(averageScore.toFixed(2)),
+        highestScore,
+        lowestScore,
+        averageCompliance: parseFloat(averageCompliance.toFixed(2)),
+        improvementRate: parseFloat(improvementRate.toFixed(2)),
+        consistencyScore: parseFloat(consistencyScore.toFixed(2)),
+        approvalRate: parseFloat(approvalRate.toFixed(2)),
+        totalSubmissions: analyses.length
+    };
+}

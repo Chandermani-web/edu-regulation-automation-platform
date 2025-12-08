@@ -10,49 +10,77 @@ const ApplicationSubmission = () => {
   const navigate = useNavigate();
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  const { currentInstitutionId, setCurrentApplicationId } = useContext(AppContext);
+  const { currentInstitutionId, setCurrentApplicationId, getApiUrl, refreshApplicationData } = useContext(AppContext);
 
   const handleSubmit = async () => {
+    console.log('=== handleSubmit called ===');
+    console.log('currentInstitutionId:', currentInstitutionId);
+    
+    if (!currentInstitutionId) {
+      setError('Institution ID is missing. Please refresh the page.');
+      console.error('No institution ID available');
+      return;
+    }
+    
     setShowConfirm(false);
+    setIsSubmitting(true);
+    setError(null);
+    
     try{
-      const response = await fetch(`http://localhost:3000/api/institution/application/create`, {
+      console.log('Making POST request to create application...');
+      const response = await fetch(`${getApiUrl()}/api/institution/application/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
         body: JSON.stringify({ institution_id: currentInstitutionId }),
       });
 
+      console.log('Response status:', response.status);
+      const data = await response.json();
+      console.log('Response data:', data);
+
       if (!response.ok) {
-        const errorData = await response.json();
-        console.error("Submission failed:", errorData.message);
-        // toast.error(`Submission failed: ${errorData.message}`, {
+        setError(data.message || 'Application submission failed');
+        console.error("Submission failed:", data.message);
+        setIsSubmitting(false);
+        return;
+        // toast.error(`Submission failed: ${data.message}`, {
         //   position: "top-center",
         //   autoClose: 3000,
-        //   onClose: () => {
-        //     // navigate("/institution/application");
-        //   },
         // });
       }
 
       if (response.ok) {
-        const data = await response.json();
         console.log("Application submitted successfully:", data.application._id);
         setCurrentApplicationId(data.application._id);
         localStorage.setItem("currentApplicationId", data.application._id);
         console.log("Current Application ID set to:", data.application._id);
-        navigate("/institution/ai-analyticsPage");
+        
+        // Refresh application data in context
+        console.log('Refreshing application data in context...');
+        await refreshApplicationData();
+        
+        setSubmitted(true);
+        setIsSubmitting(false);
+        
+        // Navigate after a brief delay to show success message
+        setTimeout(() => {
+          navigate("/institution/ai-analyticsPage");
+        }, 1500);
+        
         // toast.success("Application submitted successfully!", {
         //   position: "top-center",
         //   autoClose: 3000,
-        //   onClose: () => {
-        //   },
         // });
       }
     }catch(err){
       console.error("Error submitting application:", err);
+      setError('Network error. Please check your connection and try again.');
+      setIsSubmitting(false);
     }
-    setSubmitted(true);
   };
 
   return (
@@ -89,6 +117,13 @@ const ApplicationSubmission = () => {
               </p>
             </div>
 
+            {/* ERROR MESSAGE */}
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <p className="text-sm text-red-600">{error}</p>
+              </div>
+            )}
+
             {/* KEY POINTS */}
             <div className="space-y-3 mb-6">
               <div className="flex items-center gap-3 text-sm text-gray-600">
@@ -108,10 +143,24 @@ const ApplicationSubmission = () => {
             {/* SUBMIT BUTTON */}
             <button
               onClick={() => setShowConfirm(true)}
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-3 shadow-sm transition-colors duration-200"
+              disabled={isSubmitting || !currentInstitutionId}
+              className={`w-full py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-3 shadow-sm transition-colors duration-200 ${
+                isSubmitting || !currentInstitutionId
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white'
+              }`}
             >
-              <Send size={20} />
-              Submit Application
+              {isSubmitting ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  Submitting...
+                </>
+              ) : (
+                <>
+                  <Send size={20} />
+                  Submit Application
+                </>
+              )}
             </button>
 
             <p className="text-xs text-gray-500 text-center mt-4">

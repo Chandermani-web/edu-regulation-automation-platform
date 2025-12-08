@@ -147,14 +147,21 @@ export const updateInstitute = asyncHandler(async (req, res) => {
 });
 
 export const getAllInstitute = asyncHandler(async (req, res) => {
+    console.log('=== getAllInstitute called ===');
+    
     const institutes = await Institution.find()
-        .populate(
-            'parameters',
-            'parameter_category parameter_name norm_value institution_value authority criticality is_compliant'
-        )
+        .populate({
+            path: 'parameters',
+            select: 'institution_value is_compliant remarks parameter_template_id',
+            populate: {
+                path: 'parameter_template_id',
+                model: 'ParameterTemplate',
+                select: 'parameter_category parameter_name norm_value authority criticality description'
+            }
+        })
         .populate(
             'documents',
-            'title file_url public_id category, uploaded_by upliaded_at'
+            'title file_url public_id category uploaded_by uploaded_at'
         )
         .populate(
             'applications',
@@ -165,8 +172,17 @@ export const getAllInstitute = asyncHandler(async (req, res) => {
             'institution_id application_id  analyzed_by input_data ai_output institution_details visual_detection scores final_decision ai_total_score final_status parameter_compliance_score status error run_count run_at'
         );
 
+    // Debug log first parameter of first institution
+    if (institutes?.length > 0 && institutes[0].parameters?.length > 0) {
+        console.log('Sample parameter:', JSON.stringify(institutes[0].parameters[0], null, 2));
+    }
+
     if (!institutes)
         return res.status(404).json({ message: 'Institutes not found' });
 
-    res.status(200).json(institutes);
+    res.status(200).json({
+        success: true,
+        count: institutes.length,
+        data: institutes
+    });
 });

@@ -13,7 +13,7 @@ const InstitutionProfile = () => {
     user,
   } = useContext(AppContext);
 
-  const savedData = institutionDetails?.data?.[0] || {};
+  const savedData = institutionDetails || {};
 
   // ================= STATE ACCORDING TO YOUR SCHEMA =================
   const [institutionData, setInstitutionData] = useState({

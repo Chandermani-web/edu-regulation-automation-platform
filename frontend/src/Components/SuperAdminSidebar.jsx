@@ -8,7 +8,11 @@ import {
   Building2,
   Shield,
   Award,
-  ChevronRight
+  ChevronRight,
+  Users,
+  Settings,
+  GitCompare,
+  Key
 } from "lucide-react";
 
 const SuperAdminSidebar = () => {
@@ -20,6 +24,36 @@ const SuperAdminSidebar = () => {
       name: "Dashboard", 
       icon: <LayoutDashboard size={20} />, 
       path: "/super-admin/dashboard" 
+    },
+    { 
+      name: "User Management", 
+      icon: <Users size={20} />, 
+      path: "/super-admin/users",
+      badge: "Admin"
+    },
+    { 
+      name: "Institution Management", 
+      icon: <Building2 size={20} />, 
+      path: "/super-admin/institutions",
+      badge: "Admin"
+    },
+    { 
+      name: "Parameter Management", 
+      icon: <Settings size={20} />, 
+      path: "/super-admin/parameters",
+      badge: "Admin"
+    },
+    { 
+      name: "API Key Management", 
+      icon: <Key size={20} />, 
+      path: "/super-admin/api-keys",
+      badge: "Secure"
+    },
+    { 
+      name: "Institution Comparison", 
+      icon: <GitCompare size={20} />, 
+      path: "/super-admin/comparison",
+      badge: "New"
     },
     { 
       name: "Latest Applications", 
@@ -119,6 +153,15 @@ const SuperAdminSidebar = () => {
                     {item.icon}
                   </div>
                   <span className="font-medium">{item.name}</span>
+                  {item.badge && (
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${
+                      isActive || isActiveStyle 
+                        ? "bg-white/20 text-white" 
+                        : "bg-blue-100 text-blue-700"
+                    }`}>
+                      {item.badge}
+                    </span>
+                  )}
                 </div>
                 {(isActive || isActiveStyle) && (
                   <ChevronRight size={16} className="text-white/80" />

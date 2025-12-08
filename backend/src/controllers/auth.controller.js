@@ -12,27 +12,37 @@ const generateToken = (user) => {
 // login
 export const login = asyncHandler(async (req, res) => {
     const { email, password } = req.body;
-    let role = null;
 
-    const institutionDomains = [
-        '.edu',
-        '.ac.in',
-        '.college.edu',
-        '.university.in',
-    ];
+    // Validate input
+    if (!email || !password) {
+        return res.status(400).json({ message: 'Email and password are required' });
+    }
 
-    if (email === 'chandermanimishra91@gmail.com') role = 'super_admin';
-    else if (email.endsWith('@ugc.gov.in')) role = 'ugc';
-    else if (email.endsWith('@aicte.gov.in')) role = 'aicte';
-    else if (institutionDomains.some((domain) => email.endsWith(domain)))
-        role = 'institution';
-
-    if (!role)
-        return res.status(403).json({ message: 'Email Domain not authorized' });
-
+    // Check if user exists
     let UserExist = await User.findOne({ email });
 
     if (!UserExist) {
+        // Auto-registration for specific email domains (backward compatibility)
+        let role = null;
+        const institutionDomains = [
+            '.edu',
+            '.ac.in',
+            '.college.edu',
+            '.university.in',
+        ];
+
+        if (email === 'chandermanimishra91@gmail.com') role = 'super_admin';
+        else if (email.endsWith('@ugc.gov.in')) role = 'ugc';
+        else if (email.endsWith('@aicte.gov.in')) role = 'aicte';
+        else if (institutionDomains.some((domain) => email.endsWith(domain)))
+            role = 'institution';
+
+        // If no role matched, user doesn't exist and can't auto-register
+        if (!role) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
+
+        // Auto-create user for authorized domains
         const salt = await bcrypt.genSalt(10);
         const hash = await bcrypt.hash(password, salt);
         UserExist = await User.create({
@@ -41,6 +51,13 @@ export const login = asyncHandler(async (req, res) => {
             password: hash,
             role,
         });
+    } else {
+        // User exists - verify password
+        const isPasswordValid = await bcrypt.compare(password, UserExist.password);
+        
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Invalid email or password' });
+        }
     }
 
     const token = generateToken(UserExist);

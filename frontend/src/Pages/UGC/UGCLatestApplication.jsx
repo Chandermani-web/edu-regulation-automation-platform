@@ -82,6 +82,7 @@ const LatestApplication = () => {
 
   // Filter AICTE institutions and prepare application data
   useEffect(() => {
+    console.log('UGCLatestApplication - allInstitutionDetails:', allInstitutionDetails);
     if (allInstitutionDetails) {
       const filtered = allInstitutionDetails
         .filter(
@@ -98,6 +99,7 @@ const LatestApplication = () => {
               institution: institution,
             })) || []
         );
+      console.log('UGCLatestApplication - filtered applications:', filtered);
       setAicteApplications(filtered);
     }
   }, [allInstitutionDetails]);
