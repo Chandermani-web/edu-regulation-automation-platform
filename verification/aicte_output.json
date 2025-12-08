@@ -1,0 +1,33 @@
+{
+    "institution_details": {
+        "name": "Sunrise Institute of Engineering &",
+        "category": "INSTITUTE",
+        "head_title": "Vice Chancellor",
+        "head_name": "Head Name Prof. Dr. Ritesh Anand\nAddress Phase",
+        "corpus_fund": 128500000,
+        "students": 1860,
+        "faculty": 132,
+        "faculty_ratio": 14.09,
+        "admin_area": 3600,
+        "computers": 765
+    },
+    "visual_detection": {
+        "Classroom": "94.08%",
+        "Library": "92.23%",
+        "Laboratory": "88.97%",
+        "College Building": "88.69%"
+    },
+    "scores": {
+        "financial_score": 100,
+        "faculty_score": 100,
+        "infra_score": 100,
+        "visual_score": 100.0,
+        "total_score": 100.0
+    },
+    "final_decision": {
+        "status": "Approved",
+        "reasons": [
+            "No issues found"
+        ]
+    }
+}

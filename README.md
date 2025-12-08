@@ -1,0 +1,338 @@
+# 📚 Education Regulation Automation Platform
+
+An automated platform for educational institution compliance verification using AI/ML.
+
+## 🏗️ Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     FRONTEND (React)                        │
+│                  http://localhost:5173                      │
+└───────────────────────────┬─────────────────────────────────┘
+                            │
+                            ▼
+┌─────────────────────────────────────────────────────────────┐
+│                  BACKEND (Node.js/Express)                  │
+│                  http://localhost:3000                      │
+│                                                             │
+│  ┌──────────────────────────────────────────────────┐     │
+│  │           Verification Controller                 │     │
+│  │  - verify-url     - verify-file                  │     │
+│  │  - verify-document - health check                │     │
+│  └─────────────────────┬────────────────────────────┘     │
+│                        │                                    │
+│  ┌─────────────────────▼────────────────────────────┐     │
+│  │      Python Verification Service                  │     │
+│  │  - Auto fallback (ngrok → localhost)             │     │
+│  │  - Error handling & retry logic                  │     │
+│  └─────────────────────┬────────────────────────────┘     │
+└────────────────────────┼────────────────────────────────────┘
+                         │
+         ┌───────────────┴───────────────┐
+         │                               │
+         ▼                               ▼
+┌─────────────────┐            ┌─────────────────┐
+│  ngrok (Public) │            │ Python Server   │
+│  https://...    │            │ localhost:5000  │
+└────────┬────────┘            └────────┬────────┘
+         │                               │
+         └───────────────┬───────────────┘
+                         │
+                         ▼
+              ┌─────────────────────┐
+              │  Python Flask API   │
+              │                     │
+              │  - PDF Download     │
+              │  - Text Extraction  │
+              │  - Image Analysis   │
+              │  - YOLO Models      │
+              │  - AICTE Validation │
+              └─────────────────────┘
+```
+
+## 🚀 Quick Start
+
+> 💡 **Note:** For detailed platform-specific instructions (Windows/macOS/Linux), see [CROSS_PLATFORM_SETUP.md](./CROSS_PLATFORM_SETUP.md)
+
+### Prerequisites
+- Node.js 18+ (though 20.19+ recommended)
+- Python 3.8+
+- ngrok (optional, for remote access)
+
+### 1. Clone Repository
+```bash
+git clone https://github.com/Chandermani-web/edu-regulation-automation-platform.git
+cd edu-regulation-automation-platform
+```
+
+### 2. Install Dependencies
+
+**Backend:**
+```bash
+cd backend
+npm install --legacy-peer-deps
+```
+
+**Python Server:**
+```bash
+cd ../verification
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+**Frontend:**
+```bash
+cd ../frontend
+npm install
+```
+
+### 3. Configure Environment
+
+**Backend (`backend/.env`):**
+```env
+# Database
+MONGODB_URI=your_mongodb_connection_string
+
+# Python Server
+PYTHON_SERVER_URL=https://your-ngrok-url.ngrok-free.app
+PYTHON_LOCAL_URL=http://localhost:5000
+
+# Cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+
+# JWT
+JWT_SECRET=your_jwt_secret
+```
+
+**Python Server (`verification/.env`):**
+```env
+PORT=5000
+```
+
+### 4. Start Services
+
+Terminal 1 - Python Server:
+```bash
+cd verification
+python3 -m venv venv             # Create venv (first time only)
+source venv/bin/activate         # macOS/Linux
+# OR
+venv\Scripts\activate            # Windows
+pip install -r requirements.txt  # Install dependencies
+python server.py
+```
+
+Terminal 2 - ngrok (optional):
+```bash
+ngrok http 5000
+# Copy the HTTPS URL and update backend/.env with PYTHON_SERVER_URL
+```
+
+Terminal 3 - Backend:
+```bash
+ngrok http 5000
+# Copy the HTTPS URL and update backend/.env
+```
+
+Terminal 3 - Backend:
+```bash
+cd backend
+npm start
+```
+
+Terminal 4 - Frontend:
+```bash
+cd frontend
+npm run dev
+```
+
+## 📡 API Endpoints
+
+### Verification API
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/verification/health` | GET | Check Python server health |
+| `/api/verification/verify-url` | POST | Verify PDF from URL |
+| `/api/verification/verify-file` | POST | Verify uploaded PDF |
+| `/api/verification/verify-document` | POST | Verify by document ID |
+
+### Example Request
+
+```bash
+curl -X POST http://localhost:3000/api/verification/verify-url \
+  -H "Content-Type: application/json" \
+  -d '{"pdfUrl":"https://example.com/document.pdf"}'
+```
+
+### Example Response
+
+```json
+{
+  "success": true,
+  "message": "PDF verification completed successfully",
+  "data": {
+    "institution_type": "UNIVERSITY",
+    "scores": {
+      "overall": 85,
+      "financial": 90,
+      "faculty": 80,
+      "infrastructure": 85,
+      "visual": 85
+    },
+    "red_flags": []
+  }
+}
+```
+
+## 🧪 Testing
+
+Test the integration manually:
+
+```bash
+# 1. Test Python server
+curl http://localhost:5000/health
+
+# 2. Test Backend connection
+curl http://localhost:3000/api/verification/health
+
+# 3. Test PDF verification
+curl -X POST http://localhost:3000/api/verification/verify-url \
+  -H "Content-Type: application/json" \
+  -d '{"pdfUrl":"https://example.com/document.pdf"}'
+```
+
+## 🛠️ Helper Scripts
+
+All scripts have been removed. Run servers manually as shown in the Start Services section above.
+
+## 📚 Documentation
+
+- **[INTEGRATION_GUIDE.md](./INTEGRATION_GUIDE.md)** - Complete integration documentation
+- **[PYTHON_SERVER_SETUP.md](./PYTHON_SERVER_SETUP.md)** - Python server setup guide
+- **[QUICK_REFERENCE.md](./QUICK_REFERENCE.md)** - Quick command reference
+- **[IMPLEMENTATION_SUMMARY.md](./IMPLEMENTATION_SUMMARY.md)** - Implementation details
+
+## 📁 Project Structure
+
+```
+edu-regulation-automation-platform/
+├── backend/                    # Node.js Express backend
+│   ├── src/
+│   │   ├── controllers/       # Request handlers
+│   │   ├── models/            # Database models
+│   │   ├── routes/            # API routes
+│   │   ├── services/          # Business logic
+│   │   └── middlewares/       # Auth, upload, etc.
+│   └── package.json
+├── frontend/                   # React frontend
+│   ├── src/
+│   │   ├── Components/
+│   │   ├── Pages/
+│   │   └── Context/
+│   └── package.json
+├── verification/               # Python AI/ML server
+│   ├── server.py              # Flask API
+│   ├── ai.py                  # PDF processing
+│   ├── requirements.txt
+│   └── model/                 # YOLO models
+├── start-python-server.sh     # Startup script
+├── update-ngrok-url.sh        # ngrok helper
+└── test-integration.sh        # Test script
+```
+
+## 🔧 Tech Stack
+
+### Frontend
+- React 18
+- Vite
+- React Router DOM
+- Axios
+
+### Backend
+- Node.js
+- Express.js
+- MongoDB + Mongoose
+- Cloudinary
+- JWT Authentication
+
+### Python Server
+- Flask
+- PDFPlumber
+- PyMuPDF
+- Ultralytics YOLO
+- NumPy, Pillow
+
+## 🐛 Troubleshooting
+
+### Python Server Won't Start
+```bash
+cd verification
+# Create and activate virtual environment if not done
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+python server.py
+```
+
+### Backend Can't Connect to Python
+1. Check Python server: `curl http://localhost:5000/health`
+2. Update ngrok URL: `./update-ngrok-url.sh`
+3. Restart backend
+
+### Port Already in Use
+```bash
+# Find and kill process
+lsof -i :5000
+kill -9 <PID>
+```
+
+### ngrok URL Changed
+```bash
+./update-ngrok-url.sh
+```
+
+## 🔒 Security
+
+- [ ] Add API authentication
+- [ ] Implement rate limiting
+- [ ] Validate file uploads
+- [ ] Sanitize PDF URLs
+- [ ] Use HTTPS in production
+
+## 🚀 Deployment
+
+### Python Server
+Deploy to Railway, Render, or AWS and update:
+```env
+PYTHON_SERVER_URL=https://your-production-server.com
+```
+
+### Backend & Frontend
+Deploy to Vercel, Netlify, or your preferred hosting platform.
+
+## 📝 License
+
+[Add your license here]
+
+## 👥 Contributors
+
+- [Add contributors]
+
+## 🤝 Contributing
+
+Contributions are welcome! Please read the contributing guidelines first.
+
+## 📞 Support
+
+For issues and questions:
+1. Check the documentation in the `/docs` folder
+2. Run `./test-integration.sh` for diagnostics
+3. Open an issue on GitHub
+
+---
+
+Made with ❤️ for educational institution compliance
