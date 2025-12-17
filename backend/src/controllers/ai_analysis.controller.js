@@ -187,6 +187,22 @@ export const processAIAnalysis = asyncHandler(async (req, res) => {
             await analysis.save();
             console.log(reportResult.url);
             console.log('✓ PDF report generated and uploaded to Cloudinary');
+
+            await Institution.findByIdAndUpdate(
+                institution._id,
+                {
+                    $push: { ai_reports: report._id },
+                },
+                { new: true }
+            );
+
+            await Application.findByIdAndUpdate(
+                application._id,
+                {
+                    ai_report: report._id,
+                },
+                { new: true }
+            );
         } catch (reportError) {
             console.error(
                 '✗ Failed to generate PDF report:',

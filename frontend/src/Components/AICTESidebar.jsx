@@ -27,11 +27,11 @@ const AICTESidebar = () => {
       icon: <FileSpreadsheet size={20} />, 
       path: "/aicte/latest-application" 
     },
-    { 
-      name: "Institution Comparison", 
-      icon: <GitCompare size={20} />, 
-      path: "/aicte/comparison" 
-    },
+    // { 
+    //   name: "Institution Comparison", 
+    //   icon: <GitCompare size={20} />, 
+    //   path: "/aicte/comparison" 
+    // },
     { 
       name: "Approved Universities", 
       icon: <Building2 size={20} />, 
@@ -42,11 +42,11 @@ const AICTESidebar = () => {
       icon: <Award size={20} />, 
       path: "/aicte/nirf-ranking" 
     },
-    { 
-      name: "Review & Queries", 
-      icon: <MessageSquare size={20} />, 
-      path: "/aicte/queries-and-review" 
-    },
+    // { 
+    //   name: "Review & Queries", 
+    //   icon: <MessageSquare size={20} />, 
+    //   path: "/aicte/queries-and-review" 
+    // },
     { 
       name: "Final Approval", 
       icon: <Shield size={20} />, 

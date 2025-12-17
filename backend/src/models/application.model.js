@@ -15,6 +15,8 @@ const applicationSchema = new mongoose.Schema({
         type: String,
         enum: ['aicte', 'ugc', 'super_admin'],
     },
+    parameters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parameter' }],
+    documents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Document' }],
     remarks: { type: String },
     isApproved: { type: Boolean, default: false },
     ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }],

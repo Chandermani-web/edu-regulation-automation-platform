@@ -36,11 +36,11 @@ const Sidebar = () => {
       icon: <Award size={20} />, 
       path: "/ugc/nirf-ranking" 
     },
-    { 
-      name: "Review & Queries", 
-      icon: <MessageSquare size={20} />, 
-      path: "/ugc/review-queries" 
-    },
+    // { 
+    //   name: "Review & Queries", 
+    //   icon: <MessageSquare size={20} />, 
+    //   path: "/ugc/review-queries" 
+    // },
     { 
       name: "Final Approval", 
       icon: <Shield size={20} />, 

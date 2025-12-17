@@ -53,7 +53,7 @@ router.get(
 // Get application status by institution or application ID
 // Permissions: canReadApplications
 router.get(
-  '/applications/status/:institutionId?', 
+  '/applications/status/:institutionId', 
   restrictToOwnInstitution,
   requirePermission('canReadApplications'), 
   getApplicationStatus

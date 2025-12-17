@@ -75,11 +75,11 @@ const SuperAdminSidebar = () => {
       icon: <Award size={20} />, 
       path: "/super-admin/nirf-ranking" 
     },
-    { 
-      name: "Review & Queries", 
-      icon: <MessageSquare size={20} />, 
-      path: "/super-admin/queries-and-review" 
-    },
+    // { 
+    //   name: "Review & Queries", 
+    //   icon: <MessageSquare size={20} />, 
+    //   path: "/super-admin/queries-and-review" 
+    // },
   ];
 
   const handleLogout = async () => {

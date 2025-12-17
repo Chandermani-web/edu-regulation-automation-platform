@@ -18,6 +18,7 @@ import {
   ThumbsUp,
   ThumbsDown
 } from "lucide-react";
+import ChatWidget from "../ChatWidget";
 
 const AIAnalyticsAndReports = () => {
   const [activeTab, setActiveTab] = useState("analytics");
@@ -165,7 +166,7 @@ const AIAnalyticsAndReports = () => {
           </div>
 
           {/* TAB NAVIGATION */}
-          <div className="flex border-b border-gray-200 mt-6">
+          {/* <div className="flex border-b border-gray-200 mt-6">
             <button
               onClick={() => setActiveTab("analytics")}
               className={`px-6 py-3 font-medium border-b-2 transition-colors ${
@@ -176,27 +177,7 @@ const AIAnalyticsAndReports = () => {
             >
               Analytics Dashboard
             </button>
-            <button
-              onClick={() => setActiveTab("reports")}
-              className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-                activeTab === "reports"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              Generated Reports
-            </button>
-            <button
-              onClick={() => setActiveTab("chat")}
-              className={`px-6 py-3 font-medium border-b-2 transition-colors ${
-                activeTab === "chat"
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-500 hover:text-gray-700"
-              }`}
-            >
-              AI Assistant
-            </button>
-          </div>
+          </div> */}
         </div>
 
         {/* ANALYTICS TAB */}
@@ -338,170 +319,6 @@ const AIAnalyticsAndReports = () => {
           </div>
         )}
 
-        {/* REPORTS TAB */}
-        {activeTab === "reports" && (
-          <div className="space-y-6">
-            {/* REPORT CARDS */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {reports.map((report) => (
-                <div key={report.id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                  <div className="flex items-start gap-4 mb-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center">
-                      {report.icon}
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">{report.title}</h3>
-                      <p className="text-gray-600 text-sm">{report.description}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="text-sm text-gray-500">
-                      Updated: {report.updated} • {report.version}
-                    </div>
-                    <div className="flex gap-2">
-                      <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                        <Download size={16} />
-                        Download
-                      </button>
-                      <button className="px-4 py-2 border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                        <Eye size={16} />
-                        Preview
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* REPORT HISTORY */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <History />
-                Report History
-              </h3>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Report</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Generated On</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Version</th>
-                      <th className="px-4 py-3 text-left text-sm font-semibold text-gray-900">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {reports.map((report) => (
-                      <tr key={report.id}>
-                        <td className="px-4 py-3 text-sm text-gray-900">{report.title}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{report.updated}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">{report.version}</td>
-                        <td className="px-4 py-3">
-                          <button className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors flex items-center gap-1">
-                            <Download size={14} />
-                            PDF
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* CHAT TAB */}
-        {activeTab === "chat" && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-            {/* CHAT HEADER */}
-            <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6 text-white">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-                  <Bot size={20} />
-                </div>
-                <div>
-                  <h3 className="text-lg font-semibold">AI Compliance Assistant</h3>
-                  <p className="text-blue-100 text-sm">Ask me anything about your analytics and reports</p>
-                </div>
-              </div>
-            </div>
-
-            {/* CHAT MESSAGES */}
-            <div className="h-96 overflow-y-auto p-6 space-y-4">
-              {chatMessages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex gap-3 ${msg.type === "user" ? "justify-end" : "justify-start"}`}
-                >
-                  {msg.type === "ai" && (
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <Bot size={16} className="text-blue-600" />
-                    </div>
-                  )}
-                  <div
-                    className={`max-w-[70%] rounded-2xl p-4 ${
-                      msg.type === "user"
-                        ? "bg-blue-600 text-white"
-                        : "bg-gray-100 text-gray-900"
-                    }`}
-                  >
-                    <p className="text-sm">{msg.message}</p>
-                    <div className={`text-xs mt-2 ${
-                      msg.type === "user" ? "text-blue-200" : "text-gray-500"
-                    }`}>
-                      {new Date(msg.timestamp).toLocaleTimeString()}
-                    </div>
-                  </div>
-                  {msg.type === "user" && (
-                    <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <User size={16} className="text-gray-600" />
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            {/* CHAT INPUT */}
-            <div className="border-t border-gray-200 p-4">
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
-                  placeholder="Ask about your compliance report..."
-                  className="flex-1 border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  disabled={!newMessage.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center gap-2"
-                >
-                  <Send size={18} />
-                  Send
-                </button>
-              </div>
-              <div className="flex gap-2 mt-3">
-                <button className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                  <ThumbsUp size={14} />
-                  Helpful
-                </button>
-                <button className="text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
-                  <ThumbsDown size={14} />
-                  Not Helpful
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* DOWNLOAD BUTTON */}
-        <div className="flex justify-end mt-6">
-          <button className="bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white px-6 py-3 rounded-lg font-semibold flex items-center gap-2 transition-colors shadow-sm">
-            <FileDown size={20} />
-            Download Complete Analysis Package
-          </button>
-        </div>
       </div>
     </div>
   );

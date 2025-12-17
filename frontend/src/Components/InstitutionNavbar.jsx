@@ -31,12 +31,12 @@ export default function InstitutionNavbar() {
       label: "Applications",
       description: "Manage Submissions"
     },
-    {
-      path: "/institution/queries-and-review",
-      icon: ClipboardCheck,
-      label: "Reviews & Queries",
-      description: "Status & Communications"
-    },
+    // {
+    //   path: "/institution/queries-and-review",
+    //   icon: ClipboardCheck,
+    //   label: "Reviews & Queries",
+    //   description: "Status & Communications"
+    // },
     {
       path: "/institution/ai-analysis",
       icon: Bot,
@@ -109,7 +109,7 @@ export default function InstitutionNavbar() {
                     className={isActive ? "text-blue-600" : "text-gray-400 group-hover:text-gray-600"} 
                   />
                   <div className="text-left">
-                    <div className={`font-medium text-sm ${
+                    <div className={`font-medium text-[15px] ${
                       isActive ? "text-blue-800" : "text-gray-700 group-hover:text-gray-900"
                     }`}>
                       {item.label}

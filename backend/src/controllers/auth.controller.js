@@ -20,6 +20,7 @@ export const login = asyncHandler(async (req, res) => {
 
     // Check if user exists
     let UserExist = await User.findOne({ email });
+    console.log(UserExist)
 
     if (!UserExist) {
         // Auto-registration for specific email domains (backward compatibility)
@@ -54,7 +55,7 @@ export const login = asyncHandler(async (req, res) => {
     } else {
         // User exists - verify password
         const isPasswordValid = await bcrypt.compare(password, UserExist.password);
-        
+        console.log(isPasswordValid);
         if (!isPasswordValid) {
             return res.status(401).json({ message: 'Invalid email or password' });
         }

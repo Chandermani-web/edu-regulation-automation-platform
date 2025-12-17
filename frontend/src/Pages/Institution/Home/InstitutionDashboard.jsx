@@ -36,23 +36,32 @@ const InstitutionDashboard = () => {
   const navigate = useNavigate();
   const { institutionDetails, applicationDetails } = useContext(AppContext);
 
-  // Debug logs
-  console.log('InstitutionDashboard - institutionDetails:', institutionDetails);
-  console.log('InstitutionDashboard - applicationDetails:', applicationDetails);
-  console.log('InstitutionDashboard - applicationDetails type:', typeof applicationDetails);
-  console.log('InstitutionDashboard - applicationDetails isArray:', Array.isArray(applicationDetails));
-
   // institutionDetails is now a single object, not an array with data property
-  const institution = institutionDetails || {};
-  const aiAnalysis = institution?.ai_analysis || [];
-  const aiData = aiAnalysis?.[0] || {};
+  const institution = useMemo(() => institutionDetails || {}, [institutionDetails]);
+  const aiAnalysis = useMemo(() => institution?.ai_analysis || [], [institution]);
+  const aiData = useMemo(() => aiAnalysis?.[0] || {}, [aiAnalysis]);
 
-  const applications = Array.isArray(applicationDetails)
-    ? applicationDetails
-    : [];
+  // Convert applicationDetails to proper format
+  // applicationDetails should be an array of applications
+  const applications = useMemo(() => {
+    if (!applicationDetails || applicationDetails.length === 0) {
+      return [];
+    }
 
-  console.log('InstitutionDashboard - applications array:', applications);
-  console.log('InstitutionDashboard - applications.length:', applications.length);
+    // Map applicationDetails to include institution info
+    return applicationDetails.map(app => ({
+      ...app,
+      institution_id: {
+        name: institution?.name || "Unknown Institution",
+        email: institution?.email || "N/A"
+      },
+      // Determine status from various possible sources
+      status: app.status || 
+              (app.ai_analysis && app.ai_analysis.length > 0 
+                ? app.ai_analysis[0].final_decision?.status?.toLowerCase() || "pending"
+                : "pending")
+    }));
+  }, [applicationDetails, institution]);
 
   /* -------------------- STATES -------------------- */
   const [page, setPage] = useState(1);
@@ -63,19 +72,33 @@ const InstitutionDashboard = () => {
   const [expandedApplication, setExpandedApplication] = useState(null);
 
   /* -------------------- STATS -------------------- */
-  const stats = useMemo(() => ({
-    totalApplications: applications.length,
-    approved: applications.filter(a => a.status === "approved").length,
-    pending: applications.filter(a => a.status === "pending").length,
-    rejected: applications.filter(a => a.status === "rejected").length,
-    activeQueries: institution?.queries?.length || 0,
-    documentsUploaded: Array.isArray(institution?.documents) ? institution.documents.length : 0,
-    totalDocuments: Array.isArray(institution?.documents) ? institution.documents.length : 0,
-    aiScore: aiData?.ai_total_score || 0,
-    approvalRate: applications.length > 0 
-      ? Math.round((applications.filter(a => a.status === "approved").length / applications.length) * 100) 
-      : 0
-  }), [applications, institution, aiData]);
+  const stats = useMemo(() => {
+    // Calculate AI score from scores object
+    const calculateAIScore = () => {
+      if (!aiData?.scores) return 0;
+      const scores = aiData.scores;
+      const scoreValues = Object.values(scores).filter(v => typeof v === 'number');
+      if (scoreValues.length === 0) return 0;
+      const sum = scoreValues.reduce((acc, val) => acc + val, 0);
+      return Math.round(sum / scoreValues.length);
+    };
+
+    return {
+      totalApplications: applications.length,
+      approved: applications.filter(a => a.status === "approved" || a.status === "Approved").length,
+      pending: applications.filter(a => a.status === "pending" || a.status === "Pending" || !a.status).length,
+      rejected: applications.filter(a => a.status === "rejected" || a.status === "Rejected").length,
+      activeQueries: institution?.queries?.length || 0,
+      documentsUploaded: Array.isArray(institution?.documents) 
+        ? institution.documents.filter(d => d.file_url || d.fileUrl).length 
+        : 0,
+      totalDocuments: Array.isArray(institution?.documents) ? institution.documents.length : 0,
+      aiScore: calculateAIScore(),
+      approvalRate: applications.length > 0 
+        ? Math.round((applications.filter(a => a.status === "approved" || a.status === "Approved").length / applications.length) * 100) 
+        : 0
+    };
+  }, [applications, institution, aiData]);
 
   /* -------------------- FILTER + SEARCH + SORT -------------------- */
   const filteredApplications = useMemo(() => {
@@ -403,19 +426,18 @@ const InstitutionDashboard = () => {
                   label="Basic Information"
                   items={[
                     { label: "Institution Name", value: institution?.name },
-                    // { label: "AISHE Code", value: institution?.AISHE_code },
-                    { label: "NAAC Grade", value: institution?.NAAC_grade },
-                    // { label: "District", value: institution?.district },
-                    { label: "Total Faculty", value: institution?.total_faculty },
-                    { label: "Total Students", value: institution?.total_students }
+                    { label: "Type", value: institution?.type },
+                    { label: "Website", value: institution?.website },
+                    { label: "Parameters", value: institution?.parameters?.length || 0 },
+                    { label: "Documents", value: institution?.documents?.length || 0 }
                   ]}
                 />
                 <DetailCard
                   label="Contact Details"
                   items={[
                     { icon: <Mail className="w-4 h-4" />, label: "Email", value: institution?.email },
-                    { icon: <Phone className="w-4 h-4" />, label: "Phone", value: institution?.phone },
-                    { icon: <MapPin className="w-4 h-4" />, label: "Address", value: institution?.full_address }
+                    { icon: <MapPin className="w-4 h-4" />, label: "Address", value: institution?.address },
+                    { label: "Created", value: institution?.createdAt ? new Date(institution.createdAt).toLocaleDateString() : "N/A" }
                   ]}
                 />
               </div>
@@ -442,10 +464,19 @@ const InstitutionDashboard = () => {
                 </span>
               </div>
               <div className="space-y-3">
-                <ScoreBar label="Financial" value={aiData?.scores?.financial_score} />
-                <ScoreBar label="Faculty" value={aiData?.scores?.faculty_score} />
-                <ScoreBar label="Infrastructure" value={aiData?.scores?.infra_score} />
-                <ScoreBar label="Visual Content" value={aiData?.scores?.visual_score} />
+                {aiData?.scores ? (
+                  Object.entries(aiData.scores).map(([key, value]) => (
+                    <ScoreBar 
+                      key={key}
+                      label={key.replace(/_/g, ' ').replace(/score/gi, '').trim()}
+                      value={typeof value === 'number' ? value : 0} 
+                    />
+                  ))
+                ) : (
+                  <div className="text-center text-white/60 py-4">
+                    <p className="text-sm">No score data available</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -461,10 +492,19 @@ const InstitutionDashboard = () => {
                 </div>
               </div>
               <div className="space-y-4">
-                <VisualStatus label="Classroom Facilities" status={aiData?.visual_detection?.Classroom} />
-                <VisualStatus label="Library Resources" status={aiData?.visual_detection?.Library} />
-                <VisualStatus label="Laboratory Equipment" status={aiData?.visual_detection?.Laboratory} />
-                <VisualStatus label="Campus Infrastructure" status={aiData?.visual_detection?.College_Building} />
+                {aiData?.visual_detection ? (
+                  Object.entries(aiData.visual_detection).map(([key, status]) => (
+                    <VisualStatus 
+                      key={key}
+                      label={key.replace(/_/g, ' ')}
+                      status={status} 
+                    />
+                  ))
+                ) : (
+                  <div className="text-center text-gray-500 py-4">
+                    <p className="text-sm">No visual detection data available</p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -479,36 +519,48 @@ const InstitutionDashboard = () => {
                   <p className="text-sm text-gray-500">Automated evaluation summary</p>
                 </div>
               </div>
-              <div className={`p-4 rounded-lg ${
-                aiData?.final_decision?.status === "approved" 
-                  ? "bg-emerald-50 border border-emerald-200" 
-                  : aiData?.final_decision?.status === "rejected"
-                  ? "bg-rose-50 border border-rose-200"
-                  : "bg-amber-50 border border-amber-200"
-              }`}>
-                <div className="flex items-center justify-between mb-3">
-                  <span className="font-semibold">
-                    {aiData?.final_decision?.status?.toUpperCase() || "PENDING"}
-                  </span>
-                  <span className={`text-sm px-2 py-1 rounded ${
-                    aiData?.final_decision?.status === "approved" 
-                      ? "bg-emerald-100 text-emerald-700" 
-                      : aiData?.final_decision?.status === "rejected"
-                      ? "bg-rose-100 text-rose-700"
-                      : "bg-amber-100 text-amber-700"
-                  }`}>
-                    {aiData?.final_decision?.confidence || "N/A"} confidence
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {aiData?.final_decision?.reasons?.map((reason, i) => (
-                    <div key={i} className="flex items-start gap-2 text-sm">
-                      <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5" />
-                      <span>{reason}</span>
+              {aiData?.final_decision ? (
+                <div className={`p-4 rounded-lg ${
+                  aiData.final_decision.status?.toLowerCase() === "approved" 
+                    ? "bg-emerald-50 border border-emerald-200" 
+                    : aiData.final_decision.status?.toLowerCase() === "rejected"
+                    ? "bg-rose-50 border border-rose-200"
+                    : "bg-amber-50 border border-amber-200"
+                }`}>
+                  <div className="flex items-center justify-between mb-3">
+                    <span className="font-semibold">
+                      {aiData.final_decision.status?.toUpperCase() || "PENDING"}
+                    </span>
+                    {aiData.final_decision.confidence && (
+                      <span className={`text-sm px-2 py-1 rounded ${
+                        aiData.final_decision.status?.toLowerCase() === "approved" 
+                          ? "bg-emerald-100 text-emerald-700" 
+                          : aiData.final_decision.status?.toLowerCase() === "rejected"
+                          ? "bg-rose-100 text-rose-700"
+                          : "bg-amber-100 text-amber-700"
+                      }`}>
+                        {aiData.final_decision.confidence} confidence
+                      </span>
+                    )}
+                  </div>
+                  {aiData.final_decision.reasons && aiData.final_decision.reasons.length > 0 && (
+                    <div className="space-y-2">
+                      {aiData.final_decision.reasons.map((reason, i) => (
+                        <div key={i} className="flex items-start gap-2 text-sm">
+                          <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-1.5" />
+                          <span>{reason}</span>
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  )}
                 </div>
-              </div>
+              ) : (
+                <div className="p-4 rounded-lg bg-gray-50 border border-gray-200">
+                  <p className="text-sm text-gray-500 text-center">
+                    No AI decision available yet
+                  </p>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -568,36 +620,45 @@ const DetailCard = ({ label, items }) => (
   </div>
 );
 
-const ScoreBar = ({ label, value = 0 }) => (
-  <div>
-    <div className="flex justify-between text-sm mb-1.5">
-      <span>{label}</span>
-      <span className="font-medium">{value}%</span>
+const ScoreBar = ({ label, value = 0 }) => {
+  // Ensure value is a number and within 0-100 range
+  const normalizedValue = Math.min(100, Math.max(0, typeof value === 'number' ? value : 0));
+  
+  return (
+    <div>
+      <div className="flex justify-between text-sm mb-1.5 capitalize">
+        <span>{label}</span>
+        <span className="font-medium">{normalizedValue}%</span>
+      </div>
+      <div className="h-2 bg-white/20 rounded-full overflow-hidden">
+        <div 
+          className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full transition-all duration-500"
+          style={{ width: `${normalizedValue}%` }}
+        />
+      </div>
     </div>
-    <div className="h-2 bg-white/20 rounded-full overflow-hidden">
-      <div 
-        className="h-full bg-gradient-to-r from-cyan-400 to-blue-400 rounded-full transition-all duration-500"
-        style={{ width: `${value}%` }}
-      />
-    </div>
-  </div>
-);
+  );
+};
 
-const VisualStatus = ({ label, status }) => (
-  <div className="flex items-center justify-between py-2">
-    <span className="text-sm text-gray-700">{label}</span>
-    <div className="flex items-center gap-2">
-      {status === "present" ? (
-        <>
-          <div className="w-2 h-2 rounded-full bg-emerald-500" />
-          <span className="text-sm font-medium text-emerald-600">Present</span>
-        </>
-      ) : (
-        <>
-          <div className="w-2 h-2 rounded-full bg-rose-500" />
-          <span className="text-sm font-medium text-rose-600">Missing</span>
-        </>
-      )}
+const VisualStatus = ({ label, status }) => {
+  const isPresent = status?.toLowerCase() === "present" || status?.toLowerCase() === "detected";
+  
+  return (
+    <div className="flex items-center justify-between py-2">
+      <span className="text-sm text-gray-700 capitalize">{label}</span>
+      <div className="flex items-center gap-2">
+        {isPresent ? (
+          <>
+            <div className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span className="text-sm font-medium text-emerald-600 capitalize">{status}</span>
+          </>
+        ) : (
+          <>
+            <div className="w-2 h-2 rounded-full bg-rose-500" />
+            <span className="text-sm font-medium text-rose-600 capitalize">{status || "Missing"}</span>
+          </>
+        )}
+      </div>
     </div>
-  </div>
-);
+  );
+};

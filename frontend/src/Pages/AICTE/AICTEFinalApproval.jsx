@@ -364,72 +364,129 @@ const FinalApproval = () => {
                   <thead className="bg-gray-50">
                     <tr>
                       <th className="p-4 text-left font-semibold text-gray-700 border-b">
+                        #
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700 border-b">
                         Category
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700 border-b">
                         Parameter
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700 border-b">
-                        Norm
+                        Authority
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700 border-b">
-                        Institution
+                        Norm Value
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700 border-b">
+                        Institution Value
+                      </th>
+                      <th className="p-4 text-left font-semibold text-gray-700 border-b">
+                        Criticality
                       </th>
                       <th className="p-4 text-left font-semibold text-gray-700 border-b">
                         Status
                       </th>
+                      <th className="p-4 text-left font-semibold text-gray-700 border-b">
+                        Remarks
+                      </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
-                    {institution.parameters?.map((param, index) => (
-                      <tr
-                        key={param._id || index}
-                        className="hover:bg-gray-50 transition-colors"
-                      >
-                        <td className="p-4 text-gray-700">
-                          {param.parameter_category}
-                        </td>
-                        <td className="p-4 text-gray-800 font-medium">
-                          {param.parameter_name}
-                        </td>
-                        <td className="p-4 text-gray-600">
-                          {param.norm_value}
-                        </td>
-                        <td className="p-4">
-                          <span
-                            className={`px-3 py-1 rounded-full text-sm font-medium ${
-                              param.institution_value >= param.norm_value
-                                ? "bg-green-100 text-green-800"
-                                : "bg-red-100 text-red-800"
-                            }`}
-                          >
-                            {param.institution_value}
-                          </span>
-                        </td>
-                        <td className="p-4">
-                          <div className="flex items-center gap-2">
-                            {param.is_compliant ? (
-                              <>
-                                <CheckCircle
-                                  className="text-green-500"
-                                  size={18}
-                                />
-                                <span className="text-green-700 font-semibold">
-                                  Compliant
-                                </span>
-                              </>
-                            ) : (
-                              <>
-                                <XCircle className="text-red-500" size={18} />
-                                <span className="text-red-700 font-semibold">
-                                  Non-compliant
-                                </span>
-                              </>
+                    {institution.parameters?.map((param, index) => {
+                      // Handle both populated and unpopulated parameter_template_id
+                      const template = typeof param.parameter_template_id === 'object' && param.parameter_template_id !== null
+                        ? param.parameter_template_id
+                        : {};
+                      
+                      const paramName = template.parameter_name || param.parameter_name || 'N/A';
+                      const paramCategory = template.parameter_category || param.parameter_category || 'N/A';
+                      const normValue = template.norm_value || param.norm_value || 'N/A';
+                      const authority = template.authority || param.authority || 'N/A';
+                      const criticality = template.criticality || param.criticality || 'medium';
+                      const description = template.description || param.description || '';
+
+                      return (
+                        <tr
+                          key={param._id || index}
+                          className="hover:bg-gray-50 transition-colors"
+                        >
+                          <td className="p-4 text-gray-600 font-medium">
+                            {index + 1}
+                          </td>
+                          <td className="p-4 text-gray-700">
+                            <span className="inline-block px-2 py-1 bg-blue-50 text-blue-700 rounded-md text-xs font-medium">
+                              {paramCategory}
+                            </span>
+                          </td>
+                          <td className="p-4 text-gray-800 font-medium max-w-xs">
+                            <div className="font-semibold">{paramName}</div>
+                            {description && (
+                              <div className="text-xs text-gray-500 mt-1 line-clamp-2">
+                                {description}
+                              </div>
                             )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="p-4 text-gray-600">
+                            <span className="inline-block px-2 py-1 bg-purple-50 text-purple-700 rounded-md text-xs font-medium">
+                              {authority}
+                            </span>
+                          </td>
+                          <td className="p-4 text-gray-700 font-semibold">
+                            {normValue}
+                          </td>
+                          <td className="p-4">
+                            <span
+                              className={`px-3 py-1 rounded-full text-sm font-medium ${
+                                param.institution_value && param.institution_value.trim() !== ''
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-gray-100 text-gray-600"
+                              }`}
+                            >
+                              {param.institution_value || 'Not Provided'}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                criticality === 'high'
+                                  ? "bg-red-100 text-red-700"
+                                  : criticality === 'medium'
+                                  ? "bg-yellow-100 text-yellow-700"
+                                  : "bg-green-100 text-green-700"
+                              }`}
+                            >
+                              {criticality.toUpperCase()}
+                            </span>
+                          </td>
+                          <td className="p-4">
+                            <div className="flex items-center gap-2">
+                              {param.is_compliant ? (
+                                <>
+                                  <CheckCircle
+                                    className="text-green-500"
+                                    size={18}
+                                  />
+                                  <span className="text-green-700 font-semibold text-sm">
+                                    Compliant
+                                  </span>
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="text-red-500" size={18} />
+                                  <span className="text-red-700 font-semibold text-sm">
+                                    Non-compliant
+                                  </span>
+                                </>
+                              )}
+                            </div>
+                          </td>
+                          <td className="p-4 text-gray-600 text-sm max-w-xs">
+                            {param.remarks || '-'}
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>
@@ -485,7 +542,7 @@ const FinalApproval = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
-                <div className="bg-gradient-to-r from-gray-900 to-black p-6">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6">
                   <h2 className="text-xl font-bold text-white">
                     Final AICTE Decision
                   </h2>

@@ -3,7 +3,7 @@ from flask_cors import CORS
 import os
 import requests
 import tempfile
-from ai import extract_text_data, analyze_images, calculate_and_verify, build_final_json
+from ai import process_file
 
 app = Flask(__name__)
 CORS(app)    
@@ -45,13 +45,10 @@ def verify_pdf():
             temp_pdf_path = temp_file.name
         
         try:
-            # Process the PDF using existing functions
-            text_data = extract_text_data(temp_pdf_path)
-            visual_data = analyze_images(temp_pdf_path)
-            scores, red_flags = calculate_and_verify(text_data, visual_data)
-            final_json = build_final_json(text_data, visual_data, scores, red_flags)
+            # Process the file using the new unified function
+            final_json = process_file(temp_pdf_path)
             
-            print("\n✅ PDF processing completed successfully")
+            print("\n✅ File processing completed successfully")
             
             return jsonify({
                 "success": True,
@@ -71,17 +68,17 @@ def verify_pdf():
         }), 400
     
     except Exception as e:
-        print(f"❌ Error processing PDF: {str(e)}")
+        print(f"❌ Error processing file: {str(e)}")
         return jsonify({
             "success": False,
-            "error": f"Error processing PDF: {str(e)}"
+            "error": f"Error processing file: {str(e)}"
         }), 500
 
 @app.route('/api/verify-pdf-file', methods=['POST'])
 def verify_pdf_file():
     """
-    Endpoint to receive PDF file directly
-    Expected form data: file field containing PDF
+    Endpoint to receive file directly (PDF, DOCX, TXT, CSV, JSON, or images)
+    Expected form data: file field containing the document
     """
     try:
         if 'file' not in request.files:
@@ -98,27 +95,28 @@ def verify_pdf_file():
                 "error": "No file selected"
             }), 400
         
-        if not file.filename.endswith('.pdf'):
+        # Check if file has allowed extension
+        allowed_extensions = {'.pdf', '.docx', '.txt', '.csv', '.json', '.jpg', '.jpeg', '.png'}
+        file_ext = os.path.splitext(file.filename)[1].lower()
+        
+        if file_ext not in allowed_extensions:
             return jsonify({
                 "success": False,
-                "error": "Only PDF files are sup ed"
+                "error": "Unsupported file type. Allowed: PDF, DOCX, TXT, CSV, JSON, JPG, PNG"
             }), 400
         
-        print(f"\n🔍 Processing uploaded PDF: {file.filename}\n")
+        print(f"\n🔍 Processing uploaded file: {file.filename}\n")
         
-        # Save to temporary file
-        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+        # Save to temporary file with correct extension
+        with tempfile.NamedTemporaryFile(delete=False, suffix=file_ext) as temp_file:
             file.save(temp_file.name)
             temp_pdf_path = temp_file.name
         
         try:
-            # Process the PDF
-            text_data = extract_text_data(temp_pdf_path)
-            visual_data = analyze_images(temp_pdf_path)
-            scores, red_flags = calculate_and_verify(text_data, visual_data)
-            final_json = build_final_json(text_data, visual_data, scores, red_flags)
+            # Process the file using the new unified function
+            final_json = process_file(temp_pdf_path)
             
-            print("\n✅ PDF processing completed successfully")
+            print("\n✅ File processing completed successfully")
             
             return jsonify({
                 "success": True,
@@ -131,7 +129,7 @@ def verify_pdf_file():
                 os.remove(temp_pdf_path)
     
     except Exception as e:
-        print(f"❌ Error processing PDF: {str(e)}")
+        print(f"❌ Error processing file: {str(e)}")
         return jsonify({
             "success": False,
             "error": f"Error processing PDF: {str(e)}"

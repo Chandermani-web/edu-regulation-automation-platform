@@ -32,7 +32,7 @@ const SuperAdminLatestApplication = () => {
   const [totalParameterTemplates, setTotalParameterTemplates] = useState(120); // Default fallback
   const [approvingId, setApprovingId] = useState(null);
   const [rejectingId, setRejectingId] = useState(null);
-  const { allInstitutionDetails, getApiUrl, fetchAllInstitutions } = useContext(AppContext);
+  const { allInstitutionDetails, getApiUrl, fetchAllInstitutions, allApplicationDetails } = useContext(AppContext);
 
   // Fetch total parameter templates count
   useEffect(() => {
@@ -215,7 +215,7 @@ const SuperAdminLatestApplication = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission Date</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">AI Score</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th>
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Risk Level</th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                 </tr>
@@ -257,9 +257,9 @@ const SuperAdminLatestApplication = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {institution.aiScore || "0"}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {institution.riskLevel || "0"}
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`px-2 py-1 text-xs rounded-full ${
                             status === 'submitted' 
@@ -377,10 +377,10 @@ const SuperAdminLatestApplication = () => {
 
                                   {/* AI Report */}
                                   <div className="pt-4">
-                                    {institution.ai_report_url ? (
+                                    {institution.ai_reports[0] ? (
                                       <button
                                         className="group w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                                        onClick={() => window.open(institution.ai_report_url, "_blank")}
+                                        onClick={() => window.open(institution.ai_reports[0].report_url, "_blank")}
                                       >
                                         <Download
                                           size={18}

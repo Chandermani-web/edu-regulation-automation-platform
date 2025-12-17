@@ -450,13 +450,17 @@ export default function DocumentUpload() {
   const handleFileUpload = (file) => {
     if (!file) return;
 
+    console.log('File selected:', file.name, 'Type:', file.type, 'Size:', file.size);
+
     if (file.type !== "application/pdf") {
-      alert("Only PDF files are allowed.");
+      toast.error("Only PDF files are allowed.");
+      console.error('Invalid file type:', file.type);
       return;
     }
 
     if (file.size > 50 * 1024 * 1024) { // 50MB limit
-      alert("File size must be less than 50MB.");
+      toast.error("File size must be less than 50MB.");
+      console.error('File too large:', file.size);
       return;
     }
 
@@ -492,7 +496,7 @@ export default function DocumentUpload() {
     e.preventDefault();
 
     if(!document.file){
-      alert("Please upload a document before submitting.");
+      toast.error("Please upload a document before submitting.");
       return;
     }
 
@@ -502,6 +506,9 @@ export default function DocumentUpload() {
     console.log('Submitting with institutionId:', institutionId);
     console.log('currentInstitutionId:', currentInstitutionId);
     console.log('institutionDetails?._id:', institutionDetails?._id);
+    console.log('document.file:', document.file);
+    console.log('document.file.type:', document.file.type);
+    console.log('document.file.size:', document.file.size);
     
     if (!institutionId) {
       toast.error("Institution ID not found. Please try refreshing the page.");
@@ -509,7 +516,16 @@ export default function DocumentUpload() {
       return;
     }
 
+    // Validate file type before uploading
+    if (document.file.type !== 'application/pdf') {
+      toast.error("Invalid file type. Only PDF files are allowed.");
+      console.error("Invalid file type:", document.file.type);
+      return;
+    }
+
     setDisabledOn(true);
+    toast.info("Uploading document...");
+    
     const DocumentData = new FormData();
     DocumentData.append('file', document.file);
     DocumentData.append('institution_id', institutionId);
@@ -523,6 +539,7 @@ export default function DocumentUpload() {
       });
 
       const data = await response.json();
+      console.log('Upload response:', data);
 
       if (response.ok) {
         toast.success("Document uploaded successfully!",{
@@ -533,9 +550,11 @@ export default function DocumentUpload() {
         });
       } else {
         toast.error(`Failed to upload document: ${data.message || 'Unknown error'}`);
+        console.error('Upload failed:', data);
       }
     }catch(err){
       console.error("Error uploading document:", err);
+      toast.error(`Upload error: ${err.message || 'Network error'}`);
     }   
     finally{
       setDisabledOn(false);
@@ -596,7 +615,7 @@ export default function DocumentUpload() {
                 
                 <input
                   type="file"
-                  accept=".pdf"
+                  accept="application/pdf"
                   onChange={(e) => handleFileUpload(e.target.files[0])}
                   className="hidden"
                   id="file-upload"

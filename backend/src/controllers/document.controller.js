@@ -9,17 +9,32 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     const { applicationId, title, institution_id } = req.body;
     const file = req.file;
 
-    console.log(institution_id, file?.originalname, title);
-    console.log(req.body);
+    console.log('Upload request - institution_id:', institution_id, 'file:', file?.originalname, 'title:', title);
+    console.log('Request body:', req.body);
+    console.log('File details:', file ? {
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        size: file.size
+    } : 'No file');
 
     // Validate institution_id
-    if (!institution_id || institution_id === 'null' || institution_id === 'undefined')
+    if (!institution_id || institution_id === 'null' || institution_id === 'undefined') {
+        console.error('Invalid institution_id:', institution_id);
         return res
             .status(400)
-            .json({ ok: false, message: 'Valid institution_id is required' });
+            .json({ success: false, message: 'Valid institution_id is required' });
+    }
 
-    if (!file)
-        return res.status(400).json({ ok: false, message: 'No file uploaded' });
+    if (!file) {
+        console.error('No file provided in request');
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+
+    // Validate file type
+    if (!file.mimetype || !file.mimetype.includes('pdf')) {
+        console.error('Invalid file type:', file.mimetype);
+        return res.status(400).json({ success: false, message: 'Only PDF files are allowed' });
+    }
 
     const docu = await Document.findOne({ institution_id });
 
@@ -29,47 +44,85 @@ export const uploadDocument = asyncHandler(async (req, res) => {
     }
 
     // ✅ Proper Cloudinary stream upload
-    const uploadResult = await new Promise((resolve, reject) => {
-        const stream = cloudinary.uploader.upload_stream(
-            {
-                folder: `sih/institution/${institution_id}`,
-                resource_type: 'raw',
-                access_mode: 'public',
-                overwrite: true,
-                format: 'pdf',
-            },
-            (error, result) => {
-                if (error) {
-                    console.error('Cloudinary Error:', error);
-                    reject(error);
-                } else {
-                    console.log('Cloudinary Result:', result);
-                    resolve(result);
+    let uploadResult;
+    try {
+        console.log('Starting Cloudinary upload...');
+        uploadResult = await new Promise((resolve, reject) => {
+            const stream = cloudinary.uploader.upload_stream(
+                {
+                    folder: `sih/institution/${institution_id}`,
+                    resource_type: 'raw',
+                    access_mode: 'public',
+                    overwrite: true,
+                    format: 'pdf',
+                },
+                (error, result) => {
+                    if (error) {
+                        console.error('Cloudinary Error:', error);
+                        reject(error);
+                    } else {
+                        console.log('Cloudinary Result:', result);
+                        resolve(result);
+                    }
                 }
-            }
-        );
+            );
 
-        stream.end(file.buffer); // ⬅️ very important
-    });
-
-    const doc = await Document.create({
-        institution_id,
-        application_id: applicationId || null,
-        title: title || file.originalname || 'document',
-        file_url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-        uploaded_by: req.user ? req.user._id : null,
-        uploaded_at: new Date(),
-    });
-
-    await Institution.findByIdAndUpdate(institution_id, {
-        $push: { documents: doc._id },
-    });
-
-    if (applicationId) {
-        await Application.findByIdAndUpdate(applicationId, {
-            $set: { updatedAt: new Date() },
+            stream.end(file.buffer); // ⬅️ very important
         });
+        console.log('Cloudinary upload successful');
+    } catch (error) {
+        console.error('Cloudinary upload failed:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Failed to upload file to cloud storage',
+            error: error.message 
+        });
+    }
+
+    // Create document record
+    let doc;
+    try {
+        doc = await Document.create({
+            institution_id,
+            application_id: applicationId || null,
+            title: title || file.originalname || 'document',
+            file_url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+            uploaded_by: req.user ? req.user._id : null,
+            uploaded_at: new Date(),
+        });
+        console.log('Document record created:', doc._id);
+    } catch (error) {
+        console.error('Failed to create document record:', error);
+        return res.status(500).json({ 
+            success: false, 
+            message: 'Failed to save document record',
+            error: error.message 
+        });
+    }
+
+    // Update institution with document reference
+    try {
+        await Institution.findByIdAndUpdate(institution_id, {
+            $push: { documents: doc._id },
+        });
+        console.log('Institution updated with document reference');
+    } catch (error) {
+        console.error('Failed to update institution:', error);
+        // Continue even if this fails - document is already uploaded
+    }
+
+    // Update application if provided
+    if (applicationId) {
+        try {
+            await Application.findByIdAndUpdate(applicationId, {
+                $set: { updatedAt: new Date() },
+            });
+            console.log('Application updated');
+        } catch (error) {
+            console.error('Failed to update application:', error);
+            // Continue even if this fails
+        }
     }
 
     res.status(201).json({

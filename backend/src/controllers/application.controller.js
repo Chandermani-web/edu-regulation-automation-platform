@@ -59,6 +59,8 @@ export const checkAndCreateApplication = async (institutionId, userId) => {
             institution_id: institutionId,
             status: 'submitted',
             // approved_by: institution.type, // 'ugc' or 'aicte'
+            parameters: institution.parameters,
+            documents: institution.documents,
             submitted_at: new Date(),
             submitted_by: userId,
         });
@@ -130,7 +132,9 @@ export const getApplication = asyncHandler(async (req, res) => {
             'ai_analysis',
             'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
         )
-        .populate('ai_report', 'report_title report_url created_at');
+        .populate('ai_report', 'report_title report_url created_at')
+        .populate('documents', 'title file_url public_id uploaded_at')
+        .populate('parameters', 'institution_value is_compliant remarks parameter_template_id')
 
     console.log('Applications found:', app.length);
     console.log('Applications:', JSON.stringify(app, null, 2));
@@ -187,7 +191,7 @@ export const getAllApplications = asyncHandler(async (req, res) => {
     // -------------------------
     // Fetch Applications
     // -------------------------
-    const apps = await Application.find(filter)
+    const apps = await Application.find()
         .populate(
             'institution_id',
             'name type state district full_address website established_year institution_code NAAC_grade NIRF_rank AISHE_code UDISE_code website'
@@ -201,12 +205,16 @@ export const getAllApplications = asyncHandler(async (req, res) => {
         .populate(
             'ai_analysis',
             'parameter_compliance_score status analyzed_by input_data ai_output error run_count run_at'
-        )
+        ).populate('ai_report', 'report_title report_url created_at')
+        .populate('documents', 'title file_url public_id uploaded_at')
+        .populate('parameters', 'institution_value is_compliant remarks parameter_template_id')
         .sort({ submitted_at: -1 }); // newest first
+
+        console.log(apps);
 
     return res.json({
         success: true,
-        count: apps.length,
+        // count: apps.length,
         applications: apps,
     });
 });

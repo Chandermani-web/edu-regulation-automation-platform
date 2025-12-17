@@ -46,7 +46,7 @@ const AICTELatestApplication = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [aicteApplications, setAicteApplications] = useState([]);
   const [totalParameterTemplates, setTotalParameterTemplates] = useState(120); // Default fallback
-  const { allInstitutionDetails, getApiUrl } = useContext(AppContext);
+  const { allInstitutionDetails, allApplicationDetails, getApiUrl } = useContext(AppContext);
   const navigate = useNavigate();
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -113,7 +113,7 @@ const AICTELatestApplication = () => {
       const filtered = allInstitutionDetails
         .filter(
           (institution) =>
-            (institution.type === "college" || institution.type === "institution") &&
+            (institution.type === "college") &&
             institution.applications?.some(
               (app) => app.status === "submitted" && app.isApproved !== true
             )
@@ -410,262 +410,65 @@ const AICTELatestApplication = () => {
                                       </div>
                                     )}
 
-                                    {/* AI Report */}
-                                    {/* <div className="pt-4">
-                                    {institution.ai_report_url ? (
-                                      <button
-                                        className="group w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                                        onClick={() => window.open(institution.ai_report_url, "_blank")}
-                                      >
-                                        <Download
+                                    {/* AI Report Section */}
+                                    <div>
+                                      <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                        <FileText
                                           size={18}
-                                          className="group-hover:scale-110 transition-transform"
+                                          className="text-emerald-600"
                                         />
-                                        Download AI Compliance Report
-                                      </button>
-                                    ) : (
-                                      <div className="text-center p-4 bg-amber-50 rounded-2xl border border-amber-200">
-                                        <Clock
-                                          className="mx-auto mb-2 text-amber-600"
-                                          size={20}
-                                        />
-                                        <span className="text-amber-700 font-medium text-sm">
-                                          AI Compliance Report not generated yet
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div> */}
+                                        AI Compliance Report
+                                      </h3>
+                                      {(() => {
+                                        // Find the corresponding application from allApplicationDetails
+                                        const currentApp = allApplicationDetails?.find(
+                                          app => app._id === appId
+                                        );
+                                        
+                                        // Get the latest report from ai_report array
+                                        const aiReports = currentApp?.ai_report || [];
+                                        const latestReport = aiReports.length > 0 ? aiReports[aiReports.length - 1] : null;
+                                        const reportUrl = latestReport?.report_url;
+                                        const reportTitle = latestReport?.report_title || "AI Generated Compliance Report";
 
-                                    {/* AI Analysis Section */}
-                                    <div className="pt-4 space-y-4">
-                                      {institution.ai_analysis &&
-                                      institution.ai_analysis.length > 0 ? (
-                                        institution.ai_analysis.map(
-                                          (analysis, index) => (
-                                            <div
-                                              key={index}
-                                              className="p-4 bg-white/80 rounded-2xl border border-slate-200/60 shadow-sm"
+                                        return reportUrl ? (
+                                          <div className="p-3 rounded-xl bg-white/80 border border-slate-200/60 hover:border-emerald-200/60 transition-colors">
+                                            <a
+                                              href={reportUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center justify-between group"
                                             >
-                                              <h3 className="text-lg font-semibold text-slate-800 mb-3">
-                                                AI Analysis {index + 1}
-                                              </h3>
-
-                                              {/* Institution Details */}
-                                              {analysis.institution_details && (
-                                                <div className="mb-3">
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Institution Details:
-                                                  </h4>
-                                                  <ul className="text-sm text-slate-600 space-y-1">
-                                                    <li>
-                                                      Name:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .name
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Category:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .category
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Head:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .head_title
-                                                      }{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .head_name
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Corpus Fund:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .corpus_fund
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Students:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .students
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Faculty:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .faculty
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Faculty Ratio:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .faculty_ratio
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Admin Area:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .admin_area
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Computers:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .computers
-                                                      }
-                                                    </li>
-                                                  </ul>
-                                                </div>
-                                              )}
-
-                                              {/* Visual Detection */}
-                                              {analysis.visual_detection && (
-                                                <div className="mb-3">
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Visual Detection:
-                                                  </h4>
-                                                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
-                                                    {Object.entries(
-                                                      analysis.visual_detection
-                                                    ).map(([key, value]) => (
-                                                      <div
-                                                        key={key}
-                                                        className="flex justify-between"
-                                                      >
-                                                        <span>
-                                                          {key.replace(
-                                                            "_",
-                                                            " "
-                                                          )}
-                                                        </span>
-                                                        <span
-                                                          className={`font-medium ${
-                                                            value === "missing"
-                                                              ? "text-rose-500"
-                                                              : "text-green-600"
-                                                          }`}
-                                                        >
-                                                          {value}
-                                                        </span>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
-
-                                              {/* Scores */}
-                                              {analysis.scores && (
-                                                <div className="mb-3">
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Scores:
-                                                  </h4>
-                                                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
-                                                    {Object.entries(
-                                                      analysis.scores
-                                                    ).map(([key, value]) => (
-                                                      <div
-                                                        key={key}
-                                                        className="flex justify-between"
-                                                      >
-                                                        <span>
-                                                          {key.replace(
-                                                            "_",
-                                                            " "
-                                                          )}
-                                                        </span>
-                                                        <span className="font-medium text-blue-600">
-                                                          {value}
-                                                        </span>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
-
-                                              {/* Final Decision */}
-                                              {analysis.final_decision && (
-                                                <div>
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Final Decision:
-                                                  </h4>
-                                                  <div className="flex flex-col gap-1 text-sm text-slate-600">
-                                                    <span>
-                                                      Status:
-                                                      <span
-                                                        className={`ml-1 font-semibold ${
-                                                          analysis
-                                                            .final_decision
-                                                            .status ===
-                                                          "Approved"
-                                                            ? "text-green-600"
-                                                            : analysis
-                                                                .final_decision
-                                                                .status ===
-                                                              "Rejected"
-                                                            ? "text-rose-500"
-                                                            : "text-amber-500"
-                                                        }`}
-                                                      >
-                                                        {
-                                                          analysis
-                                                            .final_decision
-                                                            .status
-                                                        }
-                                                      </span>
-                                                    </span>
-                                                    {analysis.final_decision
-                                                      .reasons.length > 0 && (
-                                                      <span>
-                                                        Reasons:{" "}
-                                                        {analysis.final_decision.reasons.join(
-                                                          ", "
-                                                        )}
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              )}
-                                            </div>
-                                          )
-                                        )
-                                      ) : (
-                                        // Button to run AI Analysis if no data
-                                        <button
-                                          onClick={() =>
-                                            handleAIAnalysis(
-                                              institution.applications?._id
-                                            )
-                                          }
-                                          disabled={aiLoading}
-                                          className="flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg transition disabled:opacity-50"
-                                        >
-                                          <Bot className="w-5 h-5" />
-                                          {aiLoading
-                                            ? "Analysing..."
-                                            : "Run AI Analysis"}
-                                        </button>
-                                      )}
+                                              <div className="flex-1">
+                                                <span className="font-medium text-slate-700 text-sm block">
+                                                  {reportTitle}
+                                                </span>
+                                                {latestReport?.created_at && (
+                                                  <span className="text-xs text-slate-500 mt-1 block">
+                                                    Generated: {new Date(latestReport.created_at).toLocaleString()}
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <div className="flex items-center gap-2 text-emerald-600 group-hover:text-emerald-700 font-medium text-sm shrink-0 ml-2">
+                                                View Report
+                                                <ExternalLink size={14} />
+                                              </div>
+                                            </a>
+                                          </div>
+                                        ) : (
+                                          <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-200">
+                                            <Clock
+                                              className="mx-auto mb-2 text-amber-600"
+                                              size={20}
+                                            />
+                                            <span className="text-amber-700 font-medium text-sm">
+                                              AI Compliance Report not generated yet
+                                            </span>
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
+
                                   </div>
 
                                   {/* Right Column - Parameters */}

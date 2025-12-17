@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from "react";
-import Layout from "../../Components/Layout.jsx";
+import AICTELayout from "../../Components/AICTELayout.jsx";
 import {
   Search,
   Eye,
@@ -41,11 +41,12 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const LatestApplication = () => {
+const UGCLatestApplication = () => {
   const [expandedInstitution, setExpandedInstitution] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
-  const [aicteApplications, setAicteApplications] = useState([]);
-  const { allInstitutionDetails } = useContext(AppContext);
+  const [ugcApplications, setUgcApplications] = useState([]);
+  const [totalParameterTemplates, setTotalParameterTemplates] = useState(120); // Default fallback
+  const { allInstitutionDetails, allApplicationDetails, getApiUrl } = useContext(AppContext);
   const navigate = useNavigate();
   const [aiLoading, setAiLoading] = useState(false);
 
@@ -80,40 +81,70 @@ const LatestApplication = () => {
     }
   };
 
+  // Fetch total parameter templates count
+  useEffect(() => {
+    const fetchTotalTemplates = async () => {
+      try {
+        const response = await fetch(`${getApiUrl()}/api/super-admin/parameter-templates`, {
+          method: "GET",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+        });
+        
+        if (response.ok) {
+          const result = await response.json();
+          const activeTemplates = result.data?.filter(t => t.is_active !== false) || result.data || [];
+          setTotalParameterTemplates(activeTemplates.length);
+          console.log('Total active parameter templates:', activeTemplates.length);
+        }
+      } catch (error) {
+        console.error("Error fetching parameter templates:", error);
+        // Keep default value of 120
+      }
+    };
+    
+    fetchTotalTemplates();
+  }, [getApiUrl]);
+
   // Filter AICTE institutions and prepare application data
   useEffect(() => {
-    console.log('UGCLatestApplication - allInstitutionDetails:', allInstitutionDetails);
+    console.log('AICTELatestApplication - allInstitutionDetails:', allInstitutionDetails);
     if (allInstitutionDetails) {
       const filtered = allInstitutionDetails
         .filter(
           (institution) =>
-            institution.type === "university" &&
+            (institution.type === "university") &&
             institution.applications?.some(
               (app) => app.status === "submitted" && app.isApproved !== true
             )
         )
         .flatMap(
-          (institution) =>
-            institution.applications?.map((application) => ({
+          (institution) => {
+            console.log('Institution parameters:', institution.name, institution.parameters);
+            if (institution.parameters?.length > 0) {
+              console.log('First parameter sample:', institution.parameters[0].parameter_template_id);
+            }
+            return institution.applications?.map((application) => ({
               ...application,
               institution: institution,
-            })) || []
+            })) || [];
+          }
         );
       console.log('UGCLatestApplication - filtered applications:', filtered);
-      setAicteApplications(filtered);
+      setUgcApplications(filtered);
     }
   }, [allInstitutionDetails]);
-
-  // Calculate progress for parameters
+  
   const calculateParameterProgress = (institution) => {
     if (!institution.parameters || institution.parameters.length === 0)
       return 0;
 
-    const completedParams = institution.parameters.filter(
-      (param) => param.is_compliant !== undefined
+    // Count parameters that have institution_value filled (not empty)
+    const filledParams = institution.parameters.filter(
+      (param) => param.institution_value && param.institution_value.trim() !== ''
     ).length;
 
-    return Math.round((completedParams / institution.parameters.length) * 100);
+    return Math.round((filledParams / totalParameterTemplates) * 100);
   };
 
   // Calculate progress for documents
@@ -128,7 +159,7 @@ const LatestApplication = () => {
   };
 
   // Filter applications based on search term
-  const filteredApplications = aicteApplications.filter((app) => {
+  const filteredApplications = ugcApplications.filter((app) => {
     if (!searchTerm) return true;
 
     const term = searchTerm.toLowerCase();
@@ -141,22 +172,22 @@ const LatestApplication = () => {
   });
 
   return (
-    <Layout className="">
+    <AICTELayout className="">
       <div className="flex flex-col">
         <div className="tracking-wide mb-8 leading-0.5">
           <h2 className="text-2xl font-semibold mb-4">
-            Latest Applications (UGC)
+            Latest Applications (AICTE)
           </h2>
           <p className="text-gray-700">
-            Review and process new UGC institutional applications
+            Review and process new AICTE institutional applications
           </p>
           <div className="mt-2 flex items-center gap-2">
             <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm font-medium rounded-full">
-              Showing only UGC institutions
+              Showing only AICTE institutions
             </span>
             <span className="text-sm text-gray-600">
-              {aicteApplications.length} application
-              {aicteApplications.length !== 1 ? "s" : ""} found
+              {ugcApplications.length} application
+              {ugcApplications.length !== 1 ? "s" : ""} found
             </span>
           </div>
         </div>
@@ -216,9 +247,9 @@ const LatestApplication = () => {
                       calculateDocumentProgress(institution);
                     const completedParams =
                       institution.parameters?.filter(
-                        (param) => param.is_compliant !== undefined
+                        (param) => param.institution_value && param.institution_value.trim() !== ''
                       ).length || 0;
-                    const totalParams = institution.parameters?.length || 0;
+                    const totalParams = totalParameterTemplates;
                     const uploadedDocs =
                       institution.documents?.filter(
                         (doc) => doc.file_url || doc.fileUrl
@@ -246,10 +277,10 @@ const LatestApplication = () => {
                             {new Date(submitted_at).toLocaleDateString()}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {institution.aiScore || "N/A"}
+                            {institution.ai_analysis[0].ai_total_score || "0"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {institution.riskLevel || "N/A"}
+                            {institution.riskLevel || "0"}
                           </td>
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span
@@ -264,7 +295,7 @@ const LatestApplication = () => {
                               {status === "submitted" ? "Pending" : status}
                             </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 flex gap-2">
                             <button
                               onClick={() =>
                                 setExpandedInstitution(
@@ -273,7 +304,7 @@ const LatestApplication = () => {
                               }
                               className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors p-2"
                             >
-                              <Eye size={18} />
+                              {/* <Eye size={18} /> */}
                               {isExpanded ? (
                                 <ChevronUp size={18} />
                               ) : (
@@ -379,262 +410,65 @@ const LatestApplication = () => {
                                       </div>
                                     )}
 
-                                    {/* AI Report */}
-                                    {/* <div className="pt-4">
-                                    {institution.ai_report_url ? (
-                                      <button
-                                        className="group w-full flex items-center justify-center gap-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
-                                        onClick={() => window.open(institution.ai_report_url, "_blank")}
-                                      >
-                                        <Download
+                                    {/* AI Report Section */}
+                                    <div>
+                                      <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                        <FileText
                                           size={18}
-                                          className="group-hover:scale-110 transition-transform"
+                                          className="text-emerald-600"
                                         />
-                                        Download AI Compliance Report
-                                      </button>
-                                    ) : (
-                                      <div className="text-center p-4 bg-amber-50 rounded-2xl border border-amber-200">
-                                        <Clock
-                                          className="mx-auto mb-2 text-amber-600"
-                                          size={20}
-                                        />
-                                        <span className="text-amber-700 font-medium text-sm">
-                                          AI Compliance Report not generated yet
-                                        </span>
-                                      </div>
-                                    )}
-                                  </div> */}
+                                        AI Compliance Report
+                                      </h3>
+                                      {(() => {
+                                        // Find the corresponding application from allApplicationDetails
+                                        const currentApp = allApplicationDetails?.find(
+                                          app => app._id === appId
+                                        );
+                                        
+                                        // Get the latest report from ai_report array
+                                        const aiReports = currentApp?.ai_report || [];
+                                        const latestReport = aiReports.length > 0 ? aiReports[aiReports.length - 1] : null;
+                                        const reportUrl = latestReport?.report_url;
+                                        const reportTitle = latestReport?.report_title || "AI Generated Compliance Report";
 
-                                    {/* AI Analysis section */}
-                                    <div className="pt-4 space-y-4">
-                                      {institution.ai_analysis &&
-                                      institution.ai_analysis.length > 0 ? (
-                                        institution.ai_analysis.map(
-                                          (analysis, index) => (
-                                            <div
-                                              key={index}
-                                              className="p-4 bg-white/80 rounded-2xl border border-slate-200/60 shadow-sm"
+                                        return reportUrl ? (
+                                          <div className="p-3 rounded-xl bg-white/80 border border-slate-200/60 hover:border-emerald-200/60 transition-colors">
+                                            <a
+                                              href={reportUrl}
+                                              target="_blank"
+                                              rel="noopener noreferrer"
+                                              className="flex items-center justify-between group"
                                             >
-                                              <h3 className="text-lg font-semibold text-slate-800 mb-3">
-                                                AI Analysis {index + 1}
-                                              </h3>
-
-                                              {/* Institution Details */}
-                                              {analysis.institution_details && (
-                                                <div className="mb-3">
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Institution Details:
-                                                  </h4>
-                                                  <ul className="text-sm text-slate-600 space-y-1">
-                                                    <li>
-                                                      Name:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .name
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Category:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .category
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Head:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .head_title
-                                                      }{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .head_name
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Corpus Fund:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .corpus_fund
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Students:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .students
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Faculty:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .faculty
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Faculty Ratio:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .faculty_ratio
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Admin Area:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .admin_area
-                                                      }
-                                                    </li>
-                                                    <li>
-                                                      Computers:{" "}
-                                                      {
-                                                        analysis
-                                                          .institution_details
-                                                          .computers
-                                                      }
-                                                    </li>
-                                                  </ul>
-                                                </div>
-                                              )}
-
-                                              {/* Visual Detection */}
-                                              {analysis.visual_detection && (
-                                                <div className="mb-3">
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Visual Detection:
-                                                  </h4>
-                                                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
-                                                    {Object.entries(
-                                                      analysis.visual_detection
-                                                    ).map(([key, value]) => (
-                                                      <div
-                                                        key={key}
-                                                        className="flex justify-between"
-                                                      >
-                                                        <span>
-                                                          {key.replace(
-                                                            "_",
-                                                            " "
-                                                          )}
-                                                        </span>
-                                                        <span
-                                                          className={`font-medium ${
-                                                            value === "missing"
-                                                              ? "text-rose-500"
-                                                              : "text-green-600"
-                                                          }`}
-                                                        >
-                                                          {value}
-                                                        </span>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
-
-                                              {/* Scores */}
-                                              {analysis.scores && (
-                                                <div className="mb-3">
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Scores:
-                                                  </h4>
-                                                  <div className="grid grid-cols-2 gap-2 text-sm text-slate-600">
-                                                    {Object.entries(
-                                                      analysis.scores
-                                                    ).map(([key, value]) => (
-                                                      <div
-                                                        key={key}
-                                                        className="flex justify-between"
-                                                      >
-                                                        <span>
-                                                          {key.replace(
-                                                            "_",
-                                                            " "
-                                                          )}
-                                                        </span>
-                                                        <span className="font-medium text-blue-600">
-                                                          {value}
-                                                        </span>
-                                                      </div>
-                                                    ))}
-                                                  </div>
-                                                </div>
-                                              )}
-
-                                              {/* Final Decision */}
-                                              {analysis.final_decision && (
-                                                <div>
-                                                  <h4 className="font-medium text-slate-700 mb-1">
-                                                    Final Decision:
-                                                  </h4>
-                                                  <div className="flex flex-col gap-1 text-sm text-slate-600">
-                                                    <span>
-                                                      Status:
-                                                      <span
-                                                        className={`ml-1 font-semibold ${
-                                                          analysis
-                                                            .final_decision
-                                                            .status ===
-                                                          "Approved"
-                                                            ? "text-green-600"
-                                                            : analysis
-                                                                .final_decision
-                                                                .status ===
-                                                              "Rejected"
-                                                            ? "text-rose-500"
-                                                            : "text-amber-500"
-                                                        }`}
-                                                      >
-                                                        {
-                                                          analysis
-                                                            .final_decision
-                                                            .status
-                                                        }
-                                                      </span>
-                                                    </span>
-                                                    {analysis.final_decision
-                                                      .reasons.length > 0 && (
-                                                      <span>
-                                                        Reasons:{" "}
-                                                        {analysis.final_decision.reasons.join(
-                                                          ", "
-                                                        )}
-                                                      </span>
-                                                    )}
-                                                  </div>
-                                                </div>
-                                              )}
-                                            </div>
-                                          )
-                                        )
-                                      ) : (
-                                        // Button to run AI Analysis if no data
-                                        <button
-                                          onClick={() =>
-                                            handleAIAnalysis(
-                                              institution.applications?._id
-                                            )
-                                          }
-                                          disabled={aiLoading}
-                                          className="flex items-center justify-center gap-2 w-full bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg transition disabled:opacity-50"
-                                        >
-                                          <Bot className="w-5 h-5" />
-                                          {aiLoading
-                                            ? "Analysing..."
-                                            : "Run AI Analysis"}
-                                        </button>
-                                      )}
+                                              <div className="flex-1">
+                                                <span className="font-medium text-slate-700 text-sm block">
+                                                  {reportTitle}
+                                                </span>
+                                                {latestReport?.created_at && (
+                                                  <span className="text-xs text-slate-500 mt-1 block">
+                                                    Generated: {new Date(latestReport.created_at).toLocaleString()}
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <div className="flex items-center gap-2 text-emerald-600 group-hover:text-emerald-700 font-medium text-sm shrink-0 ml-2">
+                                                View Report
+                                                <ExternalLink size={14} />
+                                              </div>
+                                            </a>
+                                          </div>
+                                        ) : (
+                                          <div className="text-center p-4 bg-amber-50 rounded-xl border border-amber-200">
+                                            <Clock
+                                              className="mx-auto mb-2 text-amber-600"
+                                              size={20}
+                                            />
+                                            <span className="text-amber-700 font-medium text-sm">
+                                              AI Compliance Report not generated yet
+                                            </span>
+                                          </div>
+                                        );
+                                      })()}
                                     </div>
+
                                   </div>
 
                                   {/* Right Column - Parameters */}
@@ -653,37 +487,62 @@ const LatestApplication = () => {
                                       </h3>
 
                                       <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                                        {institution.parameters?.map(
-                                          (param) => {
-                                            let status = "pending";
-                                            if (param.is_compliant === true)
-                                              status = "compliant";
-                                            if (param.is_compliant === false)
-                                              status = "non_compliant";
+                                        {institution.parameters?.length > 0 ? (
+                                          institution.parameters.map(
+                                            (param, index) => {
+                                              console.log(`Parameter ${index}:`, param);
+                                              let status = "pending";
+                                              if (param.is_compliant === true)
+                                                status = "compliant";
+                                              if (param.is_compliant === false)
+                                                status = "non_compliant";
 
-                                            return (
-                                              <div
-                                                key={param._id}
-                                                className="group p-4 rounded-2xl bg-white/80 border border-slate-200/60 hover:border-blue-200/60 hover:shadow-md transition-all duration-300"
-                                              >
-                                                <div className="flex justify-between items-start gap-3">
-                                                  <div className="flex-1 min-w-0">
-                                                    <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
-                                                      {param.parameter_name}
-                                                    </h4>
-                                                    {param.description && (
-                                                      <p className="text-slate-600 text-xs line-clamp-2">
-                                                        {param.description}
-                                                      </p>
-                                                    )}
+                                              // Get template data (nested) - handle both populated and unpopulated
+                                              const template = typeof param.parameter_template_id === 'object' && param.parameter_template_id !== null 
+                                                ? param.parameter_template_id 
+                                                : {};
+                                              const paramName = template.parameter_name || param.parameter_name || 'Unnamed Parameter';
+                                              const paramDescription = template.description || param.description || '';
+                                              const paramCategory = template.parameter_category || param.parameter_category || '';
+
+                                              return (
+                                                <div
+                                                  key={param._id || index}
+                                                  className="group p-4 rounded-2xl bg-white/80 border border-slate-200/60 hover:border-blue-200/60 hover:shadow-md transition-all duration-300"
+                                                >
+                                                  <div className="flex justify-between items-start gap-3">
+                                                    <div className="flex-1 min-w-0">
+                                                      <h4 className="font-semibold text-slate-800 text-sm mb-2 line-clamp-2">
+                                                        {paramName}
+                                                      </h4>
+                                                      {paramDescription && (
+                                                        <p className="text-slate-600 text-xs line-clamp-2">
+                                                          {paramDescription}
+                                                        </p>
+                                                      )}
+                                                      {paramCategory && (
+                                                        <p className="text-slate-500 text-xs mt-1">
+                                                          Category: {paramCategory}
+                                                        </p>
+                                                      )}
+                                                      {param.institution_value && (
+                                                        <p className="text-blue-600 text-xs mt-1 font-medium">
+                                                          Value: {param.institution_value}
+                                                        </p>
+                                                      )}
+                                                    </div>
+                                                    <StatusBadge
+                                                      status={status}
+                                                    />
                                                   </div>
-                                                  <StatusBadge
-                                                    status={status}
-                                                  />
                                                 </div>
-                                              </div>
-                                            );
-                                          }
+                                              );
+                                            }
+                                          )
+                                        ) : (
+                                          <div className="text-center py-8 text-slate-500">
+                                            No parameters found
+                                          </div>
                                         )}
                                       </div>
                                     </div>
@@ -691,7 +550,7 @@ const LatestApplication = () => {
                                       <button
                                         onClick={() =>
                                           navigate(
-                                            `/ugc/final-approval?institutionId=${institution._id}&applicationId=${appId}`
+                                            `/aicte/final-approval?institutionId=${institution._id}&applicationId=${appId}`
                                           )
                                         }
                                         className="w-full flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
@@ -742,8 +601,8 @@ const LatestApplication = () => {
           </div>
         </div>
       </div>
-    </Layout>
+    </AICTELayout>
   );
 };
 
-export default LatestApplication;
+export default UGCLatestApplication;

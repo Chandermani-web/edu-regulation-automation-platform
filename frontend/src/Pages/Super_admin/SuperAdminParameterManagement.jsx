@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import { Plus, Search, Edit, Trash2, Filter, Power, PowerOff } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Filter, Power, PowerOff, ChevronDown, ChevronUp } from 'lucide-react';
 
 const SuperAdminParameterManagement = () => {
   const [templates, setTemplates] = useState([]);
@@ -14,6 +14,7 @@ const SuperAdminParameterManagement = () => {
   const [categories, setCategories] = useState([]);
   const [showNewCategoryInput, setShowNewCategoryInput] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
+  const [isCompactView, setIsCompactView] = useState(false);
   const [formData, setFormData] = useState({
     parameter_category: '',
     parameter_name: '',
@@ -223,13 +224,22 @@ const SuperAdminParameterManagement = () => {
               </select>
             </div>
 
-            <button
-              onClick={openCreateModal}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <Plus size={20} />
-              Create Parameter Template
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setIsCompactView(!isCompactView)}
+                className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              >
+                {isCompactView ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+                {isCompactView ? 'Expand View' : 'Compact View'}
+              </button>
+              <button
+                onClick={openCreateModal}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                <Plus size={20} />
+                Create Parameter Template
+              </button>
+            </div>
           </div>
         </div>
 
@@ -247,6 +257,70 @@ const SuperAdminParameterManagement = () => {
             </div>
           ) : (
             <div className="overflow-x-auto">
+              {isCompactView ? (
+                /* Compact View */
+                <div className="space-y-2 p-4">
+                  {templates.map((template) => (
+                    <div
+                      key={template._id}
+                      className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+                    >
+                      <div className="flex items-start justify-between">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
+                              {template.parameter_category}
+                            </span>
+                            <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getCriticalityColor(template.criticality)}`}>
+                              {template.criticality || 'medium'}
+                            </span>
+                            {template.is_active ? (
+                              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                Active
+                              </span>
+                            ) : (
+                              <span className="px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">
+                                Inactive
+                              </span>
+                            )}
+                          </div>
+                          <h4 className="font-semibold text-gray-900 mb-1">{template.parameter_name}</h4>
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Norm:</span> {template.norm_value}
+                          </div>
+                          <div className="text-sm text-gray-500 mt-1">
+                            <span className="font-medium">Authority:</span> {template.authority}
+                          </div>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handleToggleStatus(template._id)}
+                            className={`${template.is_active ? 'text-gray-600 hover:text-gray-900' : 'text-green-600 hover:text-green-900'} p-2`}
+                            title={template.is_active ? 'Deactivate' : 'Activate'}
+                          >
+                            {template.is_active ? <PowerOff size={18} /> : <Power size={18} />}
+                          </button>
+                          <button
+                            onClick={() => openEditModal(template)}
+                            className="text-blue-600 hover:text-blue-900 p-2"
+                            title="Edit"
+                          >
+                            <Edit size={18} />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteTemplate(template._id)}
+                            className="text-red-600 hover:text-red-900 p-2"
+                            title="Delete"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                /* Table View */
               <table className="w-full">
                 <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
@@ -309,6 +383,7 @@ const SuperAdminParameterManagement = () => {
                   ))}
                 </tbody>
               </table>
+              )}
             </div>
           )}
         </div>

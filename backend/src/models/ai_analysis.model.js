@@ -126,6 +126,11 @@ const aiAnalysisSchema = new mongoose.Schema({
 
   run_at: {
     type: Date
+  },
+
+  ai_report: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "AIReport"
   }
 
 }, { timestamps: true });

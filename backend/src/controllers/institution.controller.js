@@ -89,7 +89,14 @@ export const getInstituteByUser = asyncHandler(async (req, res) => {
         .populate(
             'ai_analysis',
             'institution_id application_id  analyzed_by input_data ai_output institution_details visual_detection scores final_decision ai_total_score final_status parameter_compliance_score status error run_count run_at'
+        )
+        .populate(
+            'ai_reports',
+            'application_id report_url report _title ai_analysis_id'
         );
+
+        console.log(data);
+        console.log(req.user.id);
     return res.status(201).json({ success: true, data });
 });
 

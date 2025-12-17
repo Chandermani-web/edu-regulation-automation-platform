@@ -93,6 +93,8 @@ export const AppProvider = ({ children }) => {
           }
         } else {
           console.warn("No institution found for user");
+          localStorage.removeItem("institutionDetails");
+          setInstitutionDetails(null);
         }
       }
     } catch (err) {

@@ -41,7 +41,8 @@ const institutionSchema = new mongoose.Schema({
   parameters: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Parameter' }],
   documents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Document' }],
   applications: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Application' }],
-  ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }]
+  ai_analysis: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIAnalysis' }],
+  ai_reports: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AIReport' }],
 }, { timestamps: true });
 
 const Institution = mongoose.model('Institution', institutionSchema);
